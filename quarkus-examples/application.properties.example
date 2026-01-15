@@ -1,0 +1,21 @@
+# Configuration Firebase pour Quarkus
+firebase.service-account.path=firebase-service-account.json
+firebase.project-id=your-project-id
+
+# Configuration de la base de données (exemple)
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=your-username
+quarkus.datasource.password=your-password
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/pouls_ecole
+
+# Hibernate
+quarkus.hibernate-orm.database.generation=update
+
+# Logs
+quarkus.log.level=INFO
+quarkus.log.category."com.pouls.ecole".level=DEBUG
+
+# CORS (si nécessaire pour le développement)
+quarkus.http.cors=true
+quarkus.http.cors.origins=http://localhost:3000,http://localhost:8080
+
