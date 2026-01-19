@@ -15,13 +15,13 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
   final PoulsScolaireApiService _apiService = PoulsScolaireApiService();
 
   String? _fcmToken;
   StreamController<Map<String, dynamic>>? _notificationStreamController;
   Stream<Map<String, dynamic>>? _notificationStream;
+  FirebaseMessaging? _firebaseMessaging;
 
   /// Stream pour écouter les notifications reçues
   Stream<Map<String, dynamic>> get notificationStream {
@@ -33,8 +33,11 @@ class NotificationService {
   /// Initialise le service de notifications
   Future<void> initialize() async {
     try {
+      // Initialiser FirebaseMessaging seulement maintenant
+      _firebaseMessaging = FirebaseMessaging.instance;
+      
       // Demander la permission pour les notifications
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      NotificationSettings settings = await _firebaseMessaging!.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -62,7 +65,7 @@ class NotificationService {
       _setupNotificationHandlers();
 
       // Écouter les changements de token
-      _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      _firebaseMessaging?.onTokenRefresh.listen((newToken) {
         print('🔄 Token FCM rafraîchi: $newToken');
         _fcmToken = newToken;
         _saveTokenToPreferences(newToken);
@@ -120,7 +123,7 @@ class NotificationService {
     });
 
     // Vérifier si l'app a été ouverte depuis une notification
-    _firebaseMessaging.getInitialMessage().then((RemoteMessage? message) {
+    _firebaseMessaging?.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
         print('📨 App ouverte depuis une notification: ${message.notification?.title}');
         _handleNotification(message);
@@ -257,7 +260,7 @@ class NotificationService {
   /// Obtient le token FCM
   Future<String?> _getFCMToken() async {
     try {
-      _fcmToken = await _firebaseMessaging.getToken();
+      _fcmToken = await _firebaseMessaging?.getToken();
       if (_fcmToken != null) {
         print('🔑 Token FCM obtenu: $_fcmToken');
         await _saveTokenToPreferences(_fcmToken!);
@@ -376,7 +379,7 @@ class NotificationService {
       // Si pas dans les préférences, essayer de l'obtenir depuis Firebase
       print('🔄 Tentative d\'obtention du token FCM depuis Firebase...');
       try {
-        _fcmToken = await _firebaseMessaging.getToken();
+        _fcmToken = await _firebaseMessaging?.getToken();
         if (_fcmToken != null && _fcmToken!.isNotEmpty) {
           await _saveTokenToPreferences(_fcmToken!);
           print('✅ Token FCM obtenu depuis Firebase');
@@ -418,7 +421,7 @@ class NotificationService {
       }
       
       // Supprimer le token FCM localement
-      await _firebaseMessaging.deleteToken();
+      await _firebaseMessaging?.deleteToken();
       _fcmToken = null;
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('fcm_token');
@@ -431,7 +434,7 @@ class NotificationService {
   /// S'abonne à un topic
   Future<void> subscribeToTopic(String topic) async {
     try {
-      await _firebaseMessaging.subscribeToTopic(topic);
+      await _firebaseMessaging?.subscribeToTopic(topic);
       print('✅ Abonné au topic: $topic');
     } catch (e) {
       print('❌ Erreur lors de l\'abonnement au topic $topic: $e');
@@ -441,7 +444,7 @@ class NotificationService {
   /// Se désabonne d'un topic
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
-      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      await _firebaseMessaging?.unsubscribeFromTopic(topic);
       print('✅ Désabonné du topic: $topic');
     } catch (e) {
       print('❌ Erreur lors du désabonnement du topic $topic: $e');

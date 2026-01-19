@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../app.dart';
-import '../widgets/custom_button.dart';
 import 'signup_screen.dart';
 import 'otp_verification_screen.dart';
 
@@ -83,20 +82,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-            ],
+            colors: isDark
+                ? [
+                    const Color(0xFF1E1E1E),
+                    const Color(0xFF2C2C2C),
+                  ]
+                : [
+                    Colors.white,
+                    const Color(0xFFF5F9FF),
+                  ],
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
@@ -104,77 +110,103 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 40),
-                  // Logo placeholder
+                  // Logo minimaliste
                   Center(
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.school,
-                        size: 50,
-                        color: Colors.white,
-                      ),
+                    child: Icon(
+                      Icons.school,
+                      size: 64,
+                      color: isDark ? Colors.white70 : const Color(0xFF1E3A5F),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  // Message d'accueil
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      'Cher parent,\nMerci de vous impliquer régulièrement dans le suivi et l\'amélioration du résultat scolaire de votre protégé.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
+                  const SizedBox(height: 20),
+                  // Message d'accueil minimaliste
+                  Text(
+                    'Bienvenue !',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : const Color(0xFF1E3A5F),
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Connectez-vous pour suivre le parcours scolaire de votre enfant',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isDark ? Colors.grey[400] : Colors.black54,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  // Formulaire de connexion
+                  // Formulaire de connexion minimaliste
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
+                      color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 1,
-                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Colors.black.withOpacity(0.15)
+                              : Colors.black.withOpacity(0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'CONNECTEZ-VOUS',
+                          'Connexion',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : const Color(0xFF1E3A5F),
                               ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
+                        // Champ téléphone minimaliste
                         TextFormField(
                           controller: _phoneController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Numéro de téléphone',
                             hintText: '+225 XX XX XX XX',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.phone),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: isDark ? Colors.white24 : Colors.black12,
+                              ),
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: isDark ? Colors.white24 : Colors.black12,
+                              ),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: const Color(0xFF2196F3),
+                                width: 2,
+                              ),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.phone,
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                            labelStyle: TextStyle(
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                            hintStyle: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.black38,
+                            ),
                           ),
                           keyboardType: TextInputType.phone,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 16,
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez entrer votre numéro de téléphone';
                             }
-                            // Validation basique du format téléphone
                             final phoneRegex = RegExp(r'^[+]?[0-9]{8,15}$');
                             final cleanPhone = value.replaceAll(RegExp(r'[\s-]'), '');
                             if (!phoneRegex.hasMatch(cleanPhone)) {
@@ -185,41 +217,82 @@ class _LoginScreenState extends State<LoginScreen> {
                           autofocus: true,
                         ),
                         const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const SignupScreen(),
+                        // Lien créer un compte
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const SignupScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Créer un compte',
+                              style: TextStyle(
+                                color: const Color(0xFF2196F3),
+                                fontWeight: FontWeight.w500,
                               ),
-                            );
-                          },
-                          child: const Text('Créer un compte'),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 24),
-                        CustomButton(
-                          text: 'Connexion',
-                          onPressed: _handleLogin,
-                          isLoading: _isLoading,
+                        const SizedBox(height: 20),
+                        // Bouton connexion minimaliste
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2196F3),
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Text('Connexion'),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  // Info box
+                  const SizedBox(height: 16),
+                  // Info box minimaliste
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.yellow[100],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.orange,
-                        width: 1,
-                      ),
+                      color: isDark 
+                          ? const Color(0xFF2C2C2C).withOpacity(0.5)
+                          : const Color(0xFFE3F2FD).withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      'Après une première consultation, les informations d\'accès seront directement positionnées pour les prochaines consultations.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: isDark ? Colors.white54 : Colors.black54,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Après la première connexion, vos informations seront sauvegardées.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: isDark ? Colors.white60 : Colors.black54,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

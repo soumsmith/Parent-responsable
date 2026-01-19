@@ -6,6 +6,7 @@ import 'config/app_config.dart';
 import 'services/notification_service.dart';
 import 'services/database_service.dart';
 import 'services/auth_service.dart';
+import 'services/theme_service.dart';
 import 'dart:convert';
 
 // Handler pour les notifications en background (doit être top-level)
@@ -84,65 +85,49 @@ void main() async {
     // Configurer le handler pour les notifications en background
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     
-    // Initialiser le service de notifications
+    // Initialiser le service de notifications SEULEMENT après Firebase
     await NotificationService().initialize();
     print('✅ Service de notifications initialisé');
   } catch (e) {
     print('⚠️ Erreur lors de l\'initialisation de Firebase: $e');
     // Continuer même si Firebase échoue (pour le développement)
+    // Ne pas initialiser NotificationService si Firebase échoue
   }
   
   runApp(const PoulsEcoleParentApp());
 }
 
 /// Application principale
-class PoulsEcoleParentApp extends StatelessWidget {
+class PoulsEcoleParentApp extends StatefulWidget {
   const PoulsEcoleParentApp({super.key});
 
   @override
+  State<PoulsEcoleParentApp> createState() => _PoulsEcoleParentAppState();
+}
+
+class _PoulsEcoleParentAppState extends State<PoulsEcoleParentApp> {
+  final ThemeService _themeService = ThemeService();
+
+  @override
+  void initState() {
+    super.initState();
+    _themeService.loadTheme();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pouls École Parent',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0B1F3B), // Bleu nuit
-          primary: const Color(0xFF0B1F3B),
-          secondary: const Color(0xFFF7941D), // Orange
-          tertiary: const Color(0xFFFFC857), // Jaune
-          surface: Colors.white,
-          onPrimary: Colors.white,
-          onSecondary: Colors.white,
-          onSurface: const Color(0xFF0B1F3B),
-        ),
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-        ),
-      ),
-      home: const SplashScreen(),
+    return AnimatedBuilder(
+      animation: _themeService,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Pouls École Parent',
+          debugShowCheckedModeBanner: false,
+          theme: _themeService.lightTheme,
+          darkTheme: _themeService.darkTheme,
+          themeMode: _themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

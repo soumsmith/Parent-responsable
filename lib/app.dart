@@ -50,17 +50,23 @@ class _AppState extends State<App> {
     final user = AuthService.instance.getCurrentUser();
     _currentUserId = user?.id;
 
-    // Écouter les notifications
+    // Écouter les notifications SEULEMENT si le service est déjà initialisé
     _setupNotificationListener();
   }
 
   /// Configure l'écoute des notifications
   void _setupNotificationListener() {
-    _notificationSubscription = NotificationService().notificationStream.listen(
-      (notificationData) {
-        _handleNotification(notificationData);
-      },
-    );
+    try {
+      // Vérifier si NotificationService est disponible avant de l'utiliser
+      _notificationSubscription = NotificationService().notificationStream.listen(
+        (notificationData) {
+          _handleNotification(notificationData);
+        },
+      );
+    } catch (e) {
+      print('⚠️ NotificationService non disponible: $e');
+      // Ne pas faire échouer l'application si les notifications ne sont pas disponibles
+    }
   }
 
   /// Gère une notification reçue
