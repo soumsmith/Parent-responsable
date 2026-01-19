@@ -12,6 +12,7 @@ import '../services/auth_service.dart';
 import '../services/mock_api_service.dart';
 import '../services/remote_api_service.dart';
 import '../services/notification_service.dart';
+import '../services/theme_service.dart';
 import '../config/app_config.dart';
 import '../widgets/custom_button.dart';
 
@@ -23,10 +24,12 @@ class AddChildScreen extends StatefulWidget {
   State<AddChildScreen> createState() => _AddChildScreenState();
 }
 
-class _AddChildScreenState extends State<AddChildScreen> {
+class _AddChildScreenState extends State<AddChildScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _matriculeController = TextEditingController();
   final PoulsScolaireApiService _poulsApiService = PoulsScolaireApiService();
+  final ThemeService _themeService = ThemeService();
   
   bool _isLoading = false;
   bool _isSearching = false;
@@ -38,17 +41,45 @@ class _AddChildScreenState extends State<AddChildScreen> {
   List<Ecole> _ecoles = [];
   int? _selectedEcoleId;
   final TextEditingController _ecoleSearchController = TextEditingController();
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadEcoles();
+    
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    _animationController.forward();
   }
 
   @override
   void dispose() {
     _matriculeController.dispose();
     _ecoleSearchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -398,469 +429,936 @@ class _AddChildScreenState extends State<AddChildScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = _themeService.isDarkMode;
+    
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ajouter un élève'),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  // Icône
-                  Center(
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.person_add,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'AJOUTER UN ÉLÈVE',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Recherchez votre enfant par son matricule',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  // Formulaire de recherche
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Sélection de l'école
-                        // Toujours afficher le champ, même si les écoles ne sont pas encore chargées
-                        _isLoadingEcoles
-                            ? const TextField(
-                                enabled: false,
-                                decoration: InputDecoration(
-                                  labelText: 'École *',
-                                  hintText: 'Chargement des écoles...',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.school),
-                                  suffixIcon: Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : _ecoles.isEmpty
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      TextFormField(
-                                        controller: _ecoleSearchController,
-                                        decoration: InputDecoration(
-                                          labelText: 'École *',
-                                          hintText: _errorMessage ?? 'Aucune école disponible',
-                                          border: const OutlineInputBorder(),
-                                          prefixIcon: const Icon(Icons.school),
-                                          suffixIcon: const Icon(Icons.error_outline),
-                                        ),
-                                        enabled: false,
-                                        validator: (value) {
-                                          return _errorMessage ?? 'Impossible de charger les écoles. Veuillez réessayer.';
-                                        },
-                                      ),
-                                      if (_errorMessage != null) ...[
-                                        const SizedBox(height: 12),
-                                        ElevatedButton.icon(
-                                          onPressed: _loadEcoles,
-                                          icon: const Icon(Icons.refresh),
-                                          label: const Text('Réessayer'),
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(vertical: 12),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  )
-                                : Autocomplete<Ecole>(
-                            displayStringForOption: (Ecole ecole) => ecole.ecoleclibelle,
-                            optionsBuilder: (TextEditingValue textEditingValue) {
-                              // Si le champ est vide, retourner toutes les écoles
-                              if (textEditingValue.text.isEmpty) {
-                                return _ecoles;
-                              }
-                              // Sinon, filtrer les écoles selon la recherche
-                              final query = textEditingValue.text.toLowerCase();
-                              return _ecoles.where((ecole) {
-                                final nomMatch = ecole.ecoleclibelle.toLowerCase().contains(query);
-                                final codeMatch = ecole.ecolecode.toLowerCase().contains(query);
-                                return nomMatch || codeMatch;
-                              }).toList();
-                            },
-                            onSelected: (Ecole ecole) {
-                              setState(() {
-                                _selectedEcoleId = ecole.ecoleid;
-                                _foundEleve = null;
-                                _foundEcole = null;
-                                _errorMessage = null;
-                              });
-                            },
-                            fieldViewBuilder: (
-                              BuildContext context,
-                              TextEditingController fieldTextEditingController,
-                              FocusNode fieldFocusNode,
-                              VoidCallback onFieldSubmitted,
-                            ) {
-                              // Initialiser le controller avec le nom de l'école sélectionnée si elle existe
-                              if (_selectedEcoleId != null && fieldTextEditingController.text.isEmpty) {
-                                final selectedEcole = _ecoles.firstWhere(
-                                  (e) => e.ecoleid == _selectedEcoleId,
-                                  orElse: () => _ecoles.first,
-                                );
-                                if (selectedEcole.ecoleid == _selectedEcoleId) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    fieldTextEditingController.text = selectedEcole.ecoleclibelle;
-                                  });
-                                }
-                              }
-                              
-                              return TextFormField(
-                                controller: fieldTextEditingController,
-                                focusNode: fieldFocusNode,
-                                decoration: InputDecoration(
-                                  labelText: 'École *',
-                                  hintText: 'Rechercher une école...',
-                                  border: const OutlineInputBorder(),
-                                  prefixIcon: const Icon(Icons.school),
-                                  suffixIcon: _selectedEcoleId != null
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () {
-                                            fieldTextEditingController.clear();
-                                            setState(() {
-                                              _selectedEcoleId = null;
-                                              _foundEleve = null;
-                                              _foundEcole = null;
-                                              _errorMessage = null;
-                                            });
-                                          },
-                                        )
-                                      : const Icon(Icons.search),
-                                ),
-                                onChanged: (value) {
-                                  // Réinitialiser la sélection si le texte ne correspond plus à l'école sélectionnée
-                                  if (_selectedEcoleId != null) {
-                                    final selectedEcole = _ecoles.firstWhere(
-                                      (e) => e.ecoleid == _selectedEcoleId,
-                                      orElse: () => _ecoles.first,
-                                    );
-                                    if (value != selectedEcole.ecoleclibelle) {
-                                      setState(() {
-                                        _selectedEcoleId = null;
-                                        _foundEleve = null;
-                                        _foundEcole = null;
-                                        _errorMessage = null;
-                                      });
-                                    }
-                                  }
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Veuillez rechercher et sélectionner une école';
-                                  }
-                                  if (_selectedEcoleId == null) {
-                                    return 'Veuillez sélectionner une école dans la liste';
-                                  }
-                                  return null;
-                                },
-                              );
-                            },
-                            optionsViewBuilder: (
-                              BuildContext context,
-                              AutocompleteOnSelected<Ecole> onSelected,
-                              Iterable<Ecole> options,
-                            ) {
-                              if (options.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-                              
-                              return Align(
-                                alignment: Alignment.topLeft,
-                                child: Material(
-                                  elevation: 4.0,
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(maxHeight: 300),
-                                    child: ListView.builder(
-                                      padding: EdgeInsets.zero,
-                                      shrinkWrap: true,
-                                      itemCount: options.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final Ecole option = options.elementAt(index);
-                                        return InkWell(
-                                          onTap: () {
-                                            onSelected(option);
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  option.ecoleclibelle,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                                if (option.ecolecode.isNotEmpty) ...[
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    'Code: ${option.ecolecode}',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        const SizedBox(height: 16),
-                        // Champ matricule
-                        TextFormField(
-                          controller: _matriculeController,
-                          decoration: const InputDecoration(
-                            labelText: 'Matricule de l\'élève *',
-                            hintText: 'Ex: MAT001',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.badge),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer le matricule';
-                            }
-                            return null;
-                          },
-                          autofocus: true,
-                          onFieldSubmitted: (_) => _searchEleve(),
-                        ),
-                        if (_errorMessage != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            _errorMessage ?? '',
-                            style: TextStyle(
-                              color: Colors.red[700],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        CustomButton(
-                          text: _isSearching ? 'Recherche...' : 'Rechercher',
-                          onPressed: _isSearching ? null : _searchEleve,
-                          isLoading: _isSearching,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Affichage des résultats
-                  if (_foundEleve != null && _foundEcole != null) ...[
-                    const SizedBox(height: 24),
-                    Builder(
-                      builder: (context) {
-                        final eleve = _foundEleve!;
-                        final ecole = _foundEcole!;
-                        return Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.green[50],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.green,
-                              width: 2,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.check_circle, color: Colors.green[700]),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Élève trouvé',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green[900],
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // Photo de l'élève
-                              if (eleve.urlPhoto != null && eleve.urlPhoto!.isNotEmpty) ...[
-                                Center(
-                                  child: Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.green,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: ClipOval(
-                                      child: Image.network(
-                                        eleve.urlPhoto!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
-                                            color: Colors.grey[300],
-                                            child: Icon(
-                                              Icons.person,
-                                              size: 50,
-                                              color: Colors.grey[600],
-                                            ),
-                                          );
-                                        },
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Center(
-                                            child: CircularProgressIndicator(
-                                              value: loadingProgress.expectedTotalBytes != null
-                                                  ? loadingProgress.cumulativeBytesLoaded /
-                                                      loadingProgress.expectedTotalBytes!
-                                                  : null,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                              _buildInfoRow(Icons.person, 'Nom', eleve.fullName),
-                              const SizedBox(height: 8),
-                              _buildInfoRow(Icons.school, 'École', ecole.ecoleclibelle),
-                              const SizedBox(height: 8),
-                              _buildInfoRow(Icons.class_, 'Classe', eleve.classe),
-                              const SizedBox(height: 8),
-                              _buildInfoRow(Icons.badge, 'Matricule', eleve.matriculeEleve),
+      backgroundColor: isDarkMode ? const Color(0xFF0F0F0F) : const Color(0xFFF8FAFC),
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(),
+          SliverToBoxAdapter(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildWelcomeSection(),
+                            const SizedBox(height: 32),
+                            _buildSearchForm(),
+                            if (_foundEleve != null && _foundEcole != null) ...[
                               const SizedBox(height: 24),
-                              CustomButton(
-                                text: 'Ajouter cet élève',
-                                onPressed: _handleAddChild,
-                                isLoading: _isLoading,
-                              ),
+                              _buildFoundStudentCard(),
                             ],
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  // Info box
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.blue,
-                        width: 1,
+                            //const SizedBox(height: 24),
+                            //_buildInfoCard(),
+                          ],
+                        ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.blue[700]),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Entrez le matricule de votre enfant pour le retrouver dans le système scolaire.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.blue[900],
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildSliverAppBar() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return SliverAppBar(
+      expandedHeight: 20,
+      floating: false,
+      pinned: true,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1A2E) : const Color(0xFF4F46E5),
+      flexibleSpace: FlexibleSpaceBar(
+        title: const Text(
+          'Ajouter un élève',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDarkMode
+                  ? [
+                      const Color(0xFF1A1A2E),
+                      const Color(0xFF2D2D44),
+                    ]
+                  : [
+                      const Color(0xFF4F46E5),
+                      const Color(0xFF7C3AED),
+                    ],
+            ),
+          ),
+        ),
+      ),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.help_outline, color: Colors.white),
+          onPressed: () {
+            _showHelpDialog();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWelcomeSection() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.15)
+                : Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+              ),
+            ),
+            child: const Icon(
+              Icons.person_add,
+              size: 30,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Ajouter votre enfant',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Retrouvez facilement votre enfant\nen entrant son matricule scolaire',
+            style: TextStyle(
+              fontSize: 14,
+              color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+              height: 1.3,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchForm() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode 
+              ? const Color(0xFF4F46E5).withOpacity(0.3)
+              : const Color(0xFF4F46E5).withOpacity(0.1),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.15)
+                : Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Recherche',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildSchoolField(),
+          const SizedBox(height: 20),
+          _buildMatriculeField(),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            _buildErrorMessage(),
+          ],
+          const SizedBox(height: 24),
+          CustomButton(
+            text: _isSearching ? 'Recherche en cours...' : 'Rechercher mon enfant',
+            onPressed: _isSearching ? null : _searchEleve,
+            isLoading: _isSearching,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSchoolField() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    if (_isLoadingEcoles) {
+      return TextFormField(
+        enabled: false,
+        decoration: InputDecoration(
+          labelText: 'École *',
+          hintText: 'Chargement des écoles...',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          prefixIcon: const Icon(Icons.school),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDarkMode ? const Color(0xFF4F46E5) : Colors.blue,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    if (_ecoles.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            controller: _ecoleSearchController,
+            decoration: InputDecoration(
+              labelText: 'École *',
+              hintText: _errorMessage ?? 'Aucune école disponible',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.school),
+              suffixIcon: const Icon(Icons.error_outline),
+              errorText: _errorMessage ?? 'Impossible de charger les écoles',
+            ),
+            enabled: false,
+          ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _loadEcoles,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Réessayer'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+    
+    return Autocomplete<Ecole>(
+      displayStringForOption: (Ecole ecole) => ecole.ecoleclibelle,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return _ecoles;
+        }
+        final query = textEditingValue.text.toLowerCase();
+        return _ecoles.where((ecole) {
+          final nomMatch = ecole.ecoleclibelle.toLowerCase().contains(query);
+          final codeMatch = ecole.ecolecode.toLowerCase().contains(query);
+          return nomMatch || codeMatch;
+        }).toList();
+      },
+      onSelected: (Ecole ecole) {
+        setState(() {
+          _selectedEcoleId = ecole.ecoleid;
+          _foundEleve = null;
+          _foundEcole = null;
+          _errorMessage = null;
+        });
+      },
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController fieldTextEditingController,
+        FocusNode fieldFocusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
+        if (_selectedEcoleId != null && fieldTextEditingController.text.isEmpty) {
+          final selectedEcole = _ecoles.firstWhere(
+            (e) => e.ecoleid == _selectedEcoleId,
+            orElse: () => _ecoles.first,
+          );
+          if (selectedEcole.ecoleid == _selectedEcoleId) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              fieldTextEditingController.text = selectedEcole.ecoleclibelle;
+            });
+          }
+        }
+        
+        return TextFormField(
+          controller: fieldTextEditingController,
+          focusNode: fieldFocusNode,
+          decoration: InputDecoration(
+            labelText: 'École *',
+            hintText: 'Rechercher une école...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            prefixIcon: const Icon(Icons.school),
+            suffixIcon: _selectedEcoleId != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      fieldTextEditingController.clear();
+                      setState(() {
+                        _selectedEcoleId = null;
+                        _foundEleve = null;
+                        _foundEcole = null;
+                        _errorMessage = null;
+                      });
+                    },
+                  )
+                : const Icon(Icons.search),
+          ),
+          onChanged: (value) {
+            if (_selectedEcoleId != null) {
+              final selectedEcole = _ecoles.firstWhere(
+                (e) => e.ecoleid == _selectedEcoleId,
+                orElse: () => _ecoles.first,
+              );
+              if (value != selectedEcole.ecoleclibelle) {
+                setState(() {
+                  _selectedEcoleId = null;
+                  _foundEleve = null;
+                  _foundEcole = null;
+                  _errorMessage = null;
+                });
+              }
+            }
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez rechercher et sélectionner une école';
+            }
+            if (_selectedEcoleId == null) {
+              return 'Veuillez sélectionner une école dans la liste';
+            }
+            return null;
+          },
+        );
+      },
+      optionsViewBuilder: (
+        BuildContext context,
+        AutocompleteOnSelected<Ecole> onSelected,
+        Iterable<Ecole> options,
+      ) {
+        if (options.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(12),
+            color: isDarkMode ? const Color(0xFF2D2D44) : Colors.white,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Ecole option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () => onSelected(option),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            option.ecoleclibelle,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          if (option.ecolecode.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Code: ${option.ecolecode}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMatriculeField() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return TextFormField(
+      controller: _matriculeController,
+      decoration: InputDecoration(
+        labelText: 'Matricule de l\'élève *',
+        hintText: 'Ex: 24047355B',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        prefixIcon: const Icon(Icons.badge),
+        helperText: 'Vous trouverez ce numéro sur les documents scolaires',
+        helperStyle: TextStyle(
+          fontSize: 12,
+          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+        ),
+      ),
+      style: TextStyle(
+        fontSize: 16,
+        color: isDarkMode ? Colors.white : Colors.black,
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Veuillez entrer le matricule';
+        }
+        return null;
+      },
+      autofocus: true,
+      onFieldSubmitted: (_) => _searchEleve(),
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.red.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red[700], size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _errorMessage ?? '',
+              style: TextStyle(
+                color: Colors.red[700],
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFoundStudentCard() {
+    final isDarkMode = _themeService.isDarkMode;
+    final eleve = _foundEleve!;
+    final ecole = _foundEcole!;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.4)
+                : const Color(0xFF4F46E5).withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header avec succès
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.green[400]!,
+                  Colors.green[600]!,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Row(
+              //mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Élève trouvé !',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Contenu principal
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Photo et informations principales
+                Row(
+                  children: [
+                    // Photo de profil
+                    Hero(
+                      tag: 'student_photo_${eleve.matriculeEleve}',
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF4F46E5),
+                              const Color(0xFF7C3AED),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDarkMode 
+                                  ? Colors.black.withOpacity(0.15)
+                                  : Colors.black.withOpacity(0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: eleve.urlPhoto != null && eleve.urlPhoto!.isNotEmpty
+                              ? Image.network(
+                                  eleve.urlPhoto!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          const Color(0xFF4F46E5),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: Colors.white,
+                                ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 20),
+                    
+                    // Informations principales
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            eleve.fullName,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Informations détaillées compactes
+                _buildCompactInfoRow(Icons.school, 'École', ecole.ecoleclibelle),
+                const SizedBox(height: 12),
+                _buildCompactInfoRow(Icons.class_, 'Classe', eleve.classe),
+                const SizedBox(height: 12),
+                _buildCompactInfoRow(Icons.badge, 'Matricule', eleve.matriculeEleve),
+                
+                const SizedBox(height: 24),
+                
+                // Bouton d'action
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF4F46E5),
+                        Color(0xFF7C3AED),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4F46E5).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: _isLoading ? null : _handleAddChild,
+                      child: Center(
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Ajouter cet élève à mon compte',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactInfoRow(IconData icon, String label, String value) {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDarkMode 
+            ? const Color(0xFF2D2D44)
+            : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDarkMode 
+              ? const Color(0xFF4F46E5).withOpacity(0.2)
+              : const Color(0xFF4F46E5).withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4F46E5).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              icon, 
+              size: 16, 
+              color: const Color(0xFF4F46E5),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '$label:',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudentInfoRow(IconData icon, String label, String value) {
+    final isDarkMode = _themeService.isDarkMode;
+    
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[700]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDarkMode 
+                ? const Color(0xFF4F46E5).withOpacity(0.1)
+                : const Color(0xFF4F46E5).withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon, 
+            size: 20, 
+            color: isDarkMode ? const Color(0xFF4F46E5) : const Color(0xFF4F46E5),
+          ),
         ),
+        const SizedBox(width: 12),
+        Text(
+          '$label:',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInfoCard() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDarkMode 
+            ? const Color(0xFF4F46E5).withOpacity(0.1)
+            : const Color(0xFF4F46E5).withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDarkMode 
+              ? const Color(0xFF4F46E5).withOpacity(0.3)
+              : const Color(0xFF4F46E5).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isDarkMode 
+                  ? const Color(0xFF4F46E5).withOpacity(0.2)
+                  : const Color(0xFF4F46E5).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.info_outline,
+              color: isDarkMode ? const Color(0xFF4F46E5) : const Color(0xFF4F46E5),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Besoin d\'aide ?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Le matricule se trouve sur les documents scolaires de votre enfant',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpDialog() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Comment trouver le matricule ?'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Le matricule de votre enfant se trouve généralement sur :',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _buildHelpItem('📄', 'Carnet de correspondance'),
+              _buildHelpItem('🎓', 'Bulletin scolaire'),
+              _buildHelpItem('📝', 'Carte d\'élève'),
+              _buildHelpItem('💻', 'Portail en ligne de l\'école'),
+              const SizedBox(height: 16),
+              const Text(
+                'Le matricule est généralement composé de chiffres et parfois de lettres.',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Compris'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpItem(String emoji, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+        ],
+      ),
     );
   }
 

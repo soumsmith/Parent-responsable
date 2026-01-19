@@ -7,6 +7,7 @@ import '../models/note_api.dart';
 import '../services/api_service.dart';
 import '../services/pouls_scolaire_api_service.dart';
 import '../services/database_service.dart';
+import '../services/theme_service.dart';
 import '../app.dart';
 import '../widgets/custom_card.dart';
 
@@ -32,6 +33,8 @@ class _NotesScreenState extends State<NotesScreen> {
   String? _selectedSubject;
   String? _selectedTrimester;
   String? _selectedYear;
+  String? _expandedSubjectId; // Pour gérer l'expansion des cards
+  final ThemeService _themeService = ThemeService();
 
   // Données chargées depuis les API
   List<Matiere> _matieres = [];
@@ -676,179 +679,31 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = _themeService.isDarkMode;
+    
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            const Color(0xFFE3F2FD), // Bleu clair selon maquette
-          ],
+          colors: isDarkMode
+              ? [
+                  const Color(0xFF121212),
+                  const Color(0xFF1E1E1E),
+                ]
+              : [
+                  Colors.white,
+                  const Color(0xFFE3F2FD), // Bleu clair selon maquette
+                ],
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Message selon maquette
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.black, width: 1),
-              ),
-              child: Text(
-                'Cher parents,\nMerci de vous impliquer régulièrement dans le suivi et l\'amélioration du résultat scolaire de votre enfant.',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ),
             const SizedBox(height: 16),
-            // Filtres selon maquette - Année en premier
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Affichage de l'année (non sélectionnable) - Positionné en premier
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Année',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    isDense: true,
-                  ),
-                  readOnly: true,
-                  controller: TextEditingController(
-                    text: _selectedYear ?? 'Chargement...',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: _isLoading || _matieres.isEmpty
-                          ? TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: 'MATIÈRE',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.search),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                                isDense: true,
-                              ),
-                              readOnly: true,
-                              controller: TextEditingController(text: 'Chargement...'),
-                            )
-                          : Autocomplete<String>(
-                              key: ValueKey('matiere_autocomplete_${_matieres.length}_${_selectedSubject}'),
-                              initialValue: TextEditingValue(
-                                text: _selectedSubject ?? 'Toutes',
-                              ),
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return ['Toutes', ..._matieres.map((m) => m.libelle)];
-                                }
-                                final query = textEditingValue.text.toLowerCase();
-                                final filtered = _matieres.where((m) => 
-                                  m.libelle.toLowerCase().contains(query)
-                                ).map((m) => m.libelle).toList();
-                                return ['Toutes', ...filtered];
-                              },
-                              displayStringForOption: (String option) => option,
-                              fieldViewBuilder: (
-                                BuildContext context,
-                                TextEditingController fieldTextEditingController,
-                                FocusNode fieldFocusNode,
-                                VoidCallback onFieldSubmitted,
-                              ) {
-                                return TextFormField(
-                                  controller: fieldTextEditingController,
-                                  focusNode: fieldFocusNode,
-                                  decoration: const InputDecoration(
-                                    labelText: 'MATIÈRE',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.search),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                                    isDense: true,
-                                  ),
-                                  onFieldSubmitted: (String value) {
-                                    onFieldSubmitted();
-                                  },
-                                );
-                              },
-                              onSelected: (String selection) {
-                                print('🔄 Matière sélectionnée: $selection');
-                                _onSubjectChanged(selection);
-                              },
-                            ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      flex: 2,
-                      child: _isLoading || _trimesters.isEmpty
-                          ? TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: 'Trimestre',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.search),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                                isDense: true,
-                              ),
-                              readOnly: true,
-                              controller: TextEditingController(
-                                text: _trimesters.isEmpty ? 'Aucun trimestre disponible' : 'Chargement...',
-                              ),
-                            )
-                          : Autocomplete<String>(
-                              key: ValueKey('trimestre_autocomplete_${_trimestersList.length}_${_selectedTrimester}'),
-                              initialValue: TextEditingValue(
-                                text: _selectedTrimester ?? 'Tous',
-                              ),
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return _trimesters;
-                                }
-                                final query = textEditingValue.text.toLowerCase();
-                                return _trimesters.where((t) => 
-                                  t.toLowerCase().contains(query)
-                                ).toList();
-                              },
-                              displayStringForOption: (String option) => option,
-                              fieldViewBuilder: (
-                                BuildContext context,
-                                TextEditingController fieldTextEditingController,
-                                FocusNode fieldFocusNode,
-                                VoidCallback onFieldSubmitted,
-                              ) {
-                                return TextFormField(
-                                  controller: fieldTextEditingController,
-                                  focusNode: fieldFocusNode,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Trimestre',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.search),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                                    isDense: true,
-                                  ),
-                                  onFieldSubmitted: (String value) {
-                                    onFieldSubmitted();
-                                  },
-                                );
-                              },
-                              onSelected: (String selection) {
-                                print('🔄 Trimestre sélectionné: $selection');
-                                _onTrimesterChanged(selection);
-                              },
-                            ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Tableau des notes
+            // Tableau des notes (avec message et filtres intégrés)
             if (_isLoading)
               const Center(
                 child: Padding(
@@ -876,13 +731,13 @@ class _NotesScreenState extends State<NotesScreen> {
                       Icon(
                         Icons.assignment_outlined,
                         size: 64,
-                        color: Colors.grey[400],
+                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Aucune note disponible',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey[600],
+                              color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -890,7 +745,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       Text(
                         'ChildId: ${widget.childId}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[500],
+                              color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -898,20 +753,19 @@ class _NotesScreenState extends State<NotesScreen> {
                   ),
                 ),
               ),
-            ] else ...[
+            ] else
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
                     'Aucune matière ne correspond aux filtres sélectionnés',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: _themeService.isDarkMode ? Colors.grey[300] : Colors.grey[600],
                         ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
-            ],
             // Moyennes globales
             if (_globalAverage != null && !_isLoadingNotes) ...[
               const SizedBox(height: 16),
@@ -924,148 +778,650 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Widget _buildNotesTable() {
+    final isDarkMode = _themeService.isDarkMode;
+    
     if (_filteredSubjectAverages.isEmpty) {
       return const SizedBox.shrink();
     }
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth > 0 ? constraints.maxWidth : 300,
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Message d'information intégré
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode 
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.1),
+                width: 1,
               ),
-              child: IntrinsicWidth(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4F46E5).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.info_outline,
+                    color: Color(0xFF4F46E5),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: const Text(
+                    'Cher parents,\nMerci de vous impliquer régulièrement dans le suivi et l\'amélioration du résultat scolaire de votre enfant.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4B5563),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Section des filtres intégrée
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode 
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    // En-tête
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green[700],
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(width: 100, child: _buildHeaderCell('Matière')),
-                          SizedBox(width: 80, child: _buildHeaderCell('1', subHeaders: ['N°Dev', 'Date', 'Note'])),
-                          SizedBox(width: 80, child: _buildHeaderCell('2', subHeaders: ['N°Dev', 'Date', 'Note'])),
-                          SizedBox(width: 80, child: _buildHeaderCell('3', subHeaders: ['N°Dev', 'Date', 'Note'])),
-                          SizedBox(width: 80, child: _buildHeaderCell('4', subHeaders: ['N°Dev', 'Date', 'Note'])),
-                          SizedBox(width: 60, child: _buildHeaderCell('Moy')),
-                          SizedBox(width: 50, child: _buildHeaderCell('Coef')),
-                          SizedBox(width: 70, child: _buildHeaderCell('Moy Coef')),
-                          SizedBox(width: 50, child: _buildHeaderCell('Rang')),
-                          SizedBox(width: 60, child: _buildHeaderCell('Effectif')),
-                          SizedBox(width: 50, child: _buildHeaderCell('Vue')),
-                        ],
+                    const Icon(Icons.tune, color: Color(0xFF4F46E5), size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Filtres',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
                       ),
                     ),
-                    // Lignes de données
-                    ..._filteredSubjectAverages.map((avg) => _buildSubjectRow(avg)),
                   ],
                 ),
-              ),
+                const SizedBox(height: 16),
+                // Affichage de l'année
+                Container(
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+                  ),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Année scolaire',
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      isDense: true,
+                      labelStyle: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                        fontSize: 14,
+                      ),
+                    ),
+                    readOnly: true,
+                    controller: TextEditingController(
+                      text: _selectedYear ?? 'Chargement...',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 2,
+                      child: _isLoading || _matieres.isEmpty
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+                              ),
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'MATIÈRE',
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  isDense: true,
+                                  labelStyle: TextStyle(
+                                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                readOnly: true,
+                                controller: TextEditingController(text: 'Chargement...'),
+                              ),
+                            )
+                          : Autocomplete<String>(
+                              key: ValueKey('matiere_autocomplete_${_matieres.length}_${_selectedSubject}'),
+                              initialValue: TextEditingValue(
+                                text: _selectedSubject ?? 'Toutes',
+                              ),
+                              optionsBuilder: (TextEditingValue textEditingValue) {
+                                if (textEditingValue.text.isEmpty) {
+                                  return ['Toutes', ..._matieres.map((m) => m.libelle)];
+                                }
+                                final query = textEditingValue.text.toLowerCase();
+                                final filtered = _matieres.where((m) => 
+                                  m.libelle.toLowerCase().contains(query)
+                                ).map((m) => m.libelle).toList();
+                                return ['Toutes', ...filtered];
+                              },
+                              displayStringForOption: (String option) => option,
+                              fieldViewBuilder: (
+                                BuildContext context,
+                                TextEditingController fieldTextEditingController,
+                                FocusNode fieldFocusNode,
+                                VoidCallback onFieldSubmitted,
+                              ) {
+                                return TextFormField(
+                                  controller: fieldTextEditingController,
+                                  focusNode: fieldFocusNode,
+                                  decoration: InputDecoration(
+                                    labelText: 'MATIÈRE',
+                                    border: InputBorder.none,
+                                    prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                    isDense: true,
+                                    labelStyle: TextStyle(
+                                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  onFieldSubmitted: (String value) {
+                                    onFieldSubmitted();
+                                  },
+                                );
+                              },
+                              onSelected: (String selection) {
+                                print('🔄 Matière sélectionnée: $selection');
+                                _onSubjectChanged(selection);
+                              },
+                            ),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      flex: 2,
+                      child: _isLoading || _trimesters.isEmpty
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+                              ),
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Trimestre',
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  isDense: true,
+                                  labelStyle: TextStyle(
+                                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                readOnly: true,
+                                controller: TextEditingController(
+                                  text: _trimesters.isEmpty ? 'Aucun trimestre disponible' : 'Chargement...',
+                                ),
+                              ),
+                            )
+                          : Autocomplete<String>(
+                              key: ValueKey('trimestre_autocomplete_${_trimestersList.length}_${_selectedTrimester}'),
+                              initialValue: TextEditingValue(
+                                text: _selectedTrimester ?? 'Tous',
+                              ),
+                              optionsBuilder: (TextEditingValue textEditingValue) {
+                                if (textEditingValue.text.isEmpty) {
+                                  return _trimesters;
+                                }
+                                final query = textEditingValue.text.toLowerCase();
+                                return _trimesters.where((t) => 
+                                  t.toLowerCase().contains(query)
+                                ).toList();
+                              },
+                              displayStringForOption: (String option) => option,
+                              fieldViewBuilder: (
+                                BuildContext context,
+                                TextEditingController fieldTextEditingController,
+                                FocusNode fieldFocusNode,
+                                VoidCallback onFieldSubmitted,
+                              ) {
+                                return TextFormField(
+                                  controller: fieldTextEditingController,
+                                  focusNode: fieldFocusNode,
+                                  decoration: InputDecoration(
+                                    labelText: 'Trimestre',
+                                    border: InputBorder.none,
+                                    prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                    isDense: true,
+                                    labelStyle: TextStyle(
+                                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  onFieldSubmitted: (String value) {
+                                    onFieldSubmitted();
+                                  },
+                                );
+                              },
+                              onSelected: (String selection) {
+                                _onTrimesterChanged(selection);
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          
+          // En-tête moderne
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4F46E5),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.analytics, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Résultats par matière',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_filteredSubjectAverages.length} matière${_filteredSubjectAverages.length > 1 ? 's' : ''}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Liste des matières en cards modernes
+          ..._filteredSubjectAverages.asMap().entries.map((entry) {
+            final index = entry.key;
+            final avg = entry.value;
+            return _buildModernSubjectCard(avg, index);
+          }),
+        ],
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text, {List<String>? subHeaders}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+  Widget _buildModernSubjectCard(SubjectAverage avg, int index) {
+    final notes = avg.notes;
+    final isLast = index == _filteredSubjectAverages.length - 1;
+    final isExpanded = _expandedSubjectId == avg.subject;
+    final isDarkMode = _themeService.isDarkMode;
+    
+    // Couleur selon la moyenne
+    Color averageColor = _getAverageColor(avg.average);
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _expandedSubjectId = isExpanded ? null : avg.subject;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        margin: EdgeInsets.only(bottom: isLast ? 0 : 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: isDarkMode 
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.02),
+              blurRadius: isExpanded ? 8 : 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+          border: Border.all(
+            color: averageColor.withOpacity(isExpanded ? 0.3 : 0.1),
+            width: isExpanded ? 1.5 : 1,
           ),
         ),
-        if (subHeaders != null)
-          ...subHeaders.map((h) => Text(
-                h,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // En-tête compact
+            Row(
+              children: [
+                // Icône matière
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: averageColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    _getSubjectIcon(avg.subject),
+                    color: averageColor,
+                    size: 18,
+                  ),
                 ),
-              )),
-      ],
+                const SizedBox(width: 12),
+                // Info matière
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              avg.subject,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                              ),
+                            ),
+                          ),
+                          // Icône d'expansion
+                          Icon(
+                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                            color: averageColor,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${notes.length} évaluation${notes.length > 1 ? 's' : ''}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Badge moyenne
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: averageColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: averageColor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    avg.average.toStringAsFixed(1),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: averageColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            // Section étendue (notes et statistiques)
+            if (isExpanded) ...[
+              const SizedBox(height: 12),
+              // Séparateur
+              Container(
+                height: 1,
+                color: (isDarkMode ? Colors.grey : Colors.grey).withOpacity(0.1),
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              const SizedBox(height: 12),
+              
+              // Notes et statistiques
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Notes
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Détail des notes',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: averageColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildCompactNotesList(notes),
+                      ],
+                    ),
+                  ),
+                  // Statistiques
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Statistiques',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: averageColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildCompactStat('Coef', avg.coefficient.toStringAsFixed(1)),
+                        const SizedBox(height: 4),
+                        _buildCompactStat('Rang', avg.rank?.toString() ?? '-'),
+                        if (avg.totalStudents != null) ...[
+                          const SizedBox(height: 4),
+                          _buildCompactStat('Effectif', avg.totalStudents.toString()),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
+              // Bouton de consultation
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                child: avg.viewed
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD1FAE5),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.green[700], size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Consulté',
+                              style: TextStyle(
+                                color: Colors.green[700],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _markAsViewed(avg),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.visibility, color: Colors.orange[700], size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Marquer consulté',
+                                  style: TextStyle(
+                                    color: Colors.orange[700],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildSubjectRow(SubjectAverage avg) {
-    final notes = avg.notes;
-    // Alterner les couleurs selon maquette (vert clair et blanc)
-    final isEven = _filteredSubjectAverages.indexOf(avg) % 2 == 0;
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: isEven ? Colors.green[50] : Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!),
-        ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(width: 100, child: Text(avg.subject, style: const TextStyle(fontWeight: FontWeight.bold))),
-          SizedBox(width: 80, child: _buildNoteCell(notes.isNotEmpty ? notes[0] : null)),
-          SizedBox(width: 80, child: _buildNoteCell(notes.length > 1 ? notes[1] : null)),
-          SizedBox(width: 80, child: _buildNoteCell(notes.length > 2 ? notes[2] : null)),
-          SizedBox(width: 80, child: _buildNoteCell(notes.length > 3 ? notes[3] : null)),
-          SizedBox(width: 60, child: Center(child: Text(avg.average.toStringAsFixed(2)))),
-          SizedBox(width: 50, child: Center(child: Text(avg.coefficient.toStringAsFixed(1)))),
-          SizedBox(width: 70, child: Center(child: Text(avg.weightedAverage.toStringAsFixed(2)))),
-          SizedBox(width: 50, child: Center(child: Text(avg.rank?.toString() ?? '-'))),
-          SizedBox(width: 60, child: Center(child: Text(avg.totalStudents?.toString() ?? '-'))),
-          SizedBox(
-            width: 50,
-            child: Center(
-              // Icône circulaire jaune selon maquette - cliquable pour marquer comme consulté
-              child: GestureDetector(
-                onTap: () {
-                  if (!avg.viewed) {
-                    _markAsViewed(avg);
-                  }
-                },
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black, width: 1),
-                  ),
-                  child: Center(
-                    child: avg.viewed
-                        ? const Text('V', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black))
-                        : const Text('', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black)),
-                  ),
+  Widget _buildCompactNotesList(List<Note> notes) {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: notes.map((note) {
+        final noteText = note.noteSur != null 
+            ? '${note.grade.toStringAsFixed(1)}/${note.noteSur!.toStringAsFixed(0)}'
+            : note.grade.toStringAsFixed(1);
+            
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                note.assignmentNumber,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
                 ),
               ),
+              Text(
+                noteText,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCompactStat(String label, String value) {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 8,
+              color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
             ),
           ),
         ],
@@ -1073,30 +1429,51 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Widget _buildNoteCell(Note? note) {
-    if (note == null) return const Text('-');
-    // Afficher la note au format "note/note sur"
-    final noteText = note.noteSur != null 
-        ? '${note.grade.toStringAsFixed(1)}/${note.noteSur!.toStringAsFixed(0)}'
-        : note.grade.toStringAsFixed(1);
+  Widget _buildStatItem(String label, String value) {
+    final isDarkMode = _themeService.isDarkMode;
     
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('${note.assignmentNumber}'),
         Text(
-          '${note.date.day}/${note.date.month}',
-          style: const TextStyle(fontSize: 10),
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+          ),
         ),
         Text(
-          noteText,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+          ),
         ),
       ],
     );
   }
 
+  Color _getAverageColor(double average) {
+    if (average >= 16) return const Color(0xFF10B981); // Vert
+    if (average >= 14) return const Color(0xFF3B82F6); // Bleu
+    if (average >= 12) return const Color(0xFFF59E0B); // Orange
+    return const Color(0xFFEF4444); // Rouge
+  }
+
+  IconData _getSubjectIcon(String subject) {
+    final lowerSubject = subject.toLowerCase();
+    if (lowerSubject.contains('math')) return Icons.calculate;
+    if (lowerSubject.contains('fran')) return Icons.menu_book;
+    if (lowerSubject.contains('histoir')) return Icons.public;
+    if (lowerSubject.contains('phys')) return Icons.science;
+    if (lowerSubject.contains('angl')) return Icons.language;
+    if (lowerSubject.contains('sport')) return Icons.sports_soccer;
+    if (lowerSubject.contains('mus')) return Icons.music_note;
+    if (lowerSubject.contains('art')) return Icons.palette;
+    return Icons.school;
+  }
+
+  
   Widget _buildGlobalAverages() {
     if (_globalAverage == null) return const SizedBox.shrink();
     

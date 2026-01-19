@@ -175,12 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           icon: const Icon(Icons.add, size: 20),
-          label: const Text(
+          label: Text(
             'Ajouter',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
+              color: isDark ? Colors.white : const Color(0xFF1A237E),
             ),
           ),
         ),
@@ -368,13 +369,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const SizedBox(height: 16),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 22),
                         child: Row(
                           children: [
                             Text(
                               'Mes Enfants',
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: isDark ? Colors.white : const Color(0xFF1A237E),
                               ),
@@ -459,54 +460,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : _children.isEmpty
                                     ? SingleChildScrollView(
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Container(
-                                                width: 80,
-                                                height: 80,
+                                                width: 60,
+                                                height: 60,
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      const Color(0xFF7E57C2).withOpacity(0.2),
-                                                      const Color(0xFF5E35B1).withOpacity(0.1),
+                                                      const Color(0xFF7E57C2).withOpacity(0.15),
+                                                      const Color(0xFF5E35B1).withOpacity(0.08),
                                                     ],
                                                   ),
-                                                  borderRadius: BorderRadius.circular(40),
+                                                  borderRadius: BorderRadius.circular(30),
                                                 ),
                                                 child: Icon(
                                                   Icons.child_care,
-                                                  size: 40,
+                                                  size: 32,
                                                   color: const Color(0xFF7E57C2),
                                                 ),
                                               ),
-                                              const SizedBox(height: 20),
+                                              const SizedBox(height: 16),
                                               Text(
                                                 'Commencez votre parcours',
                                                 style: TextStyle(
-                                                  fontSize: 20,
+                                                  fontSize: 18,
                                                   fontWeight: FontWeight.w700,
                                                   color: isDark ? Colors.white : const Color(0xFF1A237E),
                                                 ),
                                               ),
-                                              const SizedBox(height: 8),
+                                              const SizedBox(height: 6),
                                               Text(
-                                                'Ajoutez votre premier enfant\npour suivre son évolution scolaire',
+                                                'Ajoutez votre premier enfant\npour suivre son évolution',
                                                 style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: 13,
                                                   color: isDark ? Colors.grey[400] : Colors.grey[600],
-                                                  height: 1.4,
+                                                  height: 1.3,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
-                                              const SizedBox(height: 24),
+                                              const SizedBox(height: 20),
                                               Container(
                                                 decoration: BoxDecoration(
                                                   gradient: const LinearGradient(
                                                     colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
                                                   ),
-                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderRadius: BorderRadius.circular(10),
                                                 ),
                                                 child: ElevatedButton.icon(
                                                   onPressed: () async {
@@ -519,12 +520,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       _loadChildren();
                                                     }
                                                   },
-                                                  icon: const Icon(Icons.add, size: 18),
-                                                  label: const Text('Ajouter un enfant'),
+                                                  icon: const Icon(Icons.add, size: 16),
+                                                  label: const Text('Ajouter'),
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor: Colors.transparent,
                                                     shadowColor: Colors.transparent,
-                                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                                   ),
                                                 ),
                                               ),
@@ -533,17 +534,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       )
                                     : ListView.builder(
-                                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 80),
+                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                                         itemCount: _children.length,
                                         itemBuilder: (context, index) {
                                           final child = _children[index];
                                           return Container(
-                                            margin: const EdgeInsets.only(bottom: 16),
+                                            margin: const EdgeInsets.only(bottom: 8),
                                             decoration: BoxDecoration(
                                               color: isDark 
                                                   ? Colors.white.withOpacity(0.05)
                                                   : Colors.white,
-                                              borderRadius: BorderRadius.circular(20),
+                                              borderRadius: BorderRadius.circular(16),
                                               border: Border.all(
                                                 color: isDark 
                                                     ? Colors.white.withOpacity(0.1)
@@ -553,18 +554,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: isDark
-                                                      ? Colors.black.withOpacity(0.1)
-                                                      : Colors.black.withOpacity(0.05),
-                                                  blurRadius: 10,
-                                                  offset: const Offset(0, 4),
+                                                      ? Colors.black.withOpacity(0.08)
+                                                      : Colors.black.withOpacity(0.04),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 2),
                                                 ),
                                               ],
                                             ),
                                             child: ListTile(
-                                              contentPadding: const EdgeInsets.all(16),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                               leading: Container(
-                                                width: 56,
-                                                height: 56,
+                                                width: 42,
+                                                height: 42,
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
@@ -572,11 +573,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       const Color(0xFF5E35B1),
                                                     ],
                                                   ),
-                                                  borderRadius: BorderRadius.circular(16),
+                                                  borderRadius: BorderRadius.circular(10),
                                                 ),
                                                 child: child.photoUrl != null && child.photoUrl!.isNotEmpty
                                                     ? ClipRRect(
-                                                        borderRadius: BorderRadius.circular(16),
+                                                        borderRadius: BorderRadius.circular(10),
                                                         child: Image.network(
                                                           child.photoUrl!,
                                                           fit: BoxFit.cover,
@@ -584,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             return Icon(
                                                               Icons.person,
                                                               color: Colors.white,
-                                                              size: 28,
+                                                              size: 20,
                                                             );
                                                           },
                                                         ),
@@ -592,13 +593,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     : const Icon(
                                                         Icons.person,
                                                         color: Colors.white,
-                                                        size: 28,
+                                                        size: 20,
                                                       ),
                                               ),
                                               title: Text(
                                                 child.fullName,
                                                 style: TextStyle(
-                                                  fontSize: 18,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w700,
                                                   color: isDark ? Colors.white : const Color(0xFF1A237E),
                                                 ),
@@ -606,35 +607,34 @@ class _HomeScreenState extends State<HomeScreen> {
                                               subtitle: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  const SizedBox(height: 4),
+                                                  const SizedBox(height: 2),
                                                   Text(
                                                     child.establishment.isNotEmpty ? child.establishment : 'Établissement non renseigné',
                                                     style: TextStyle(
-                                                      fontSize: 14,
+                                                      fontSize: 11,
                                                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                                                       fontWeight: FontWeight.w500,
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 2),
                                                   Text(
                                                     child.grade.isNotEmpty ? child.grade : 'Classe non renseignée',
                                                     style: TextStyle(
-                                                      fontSize: 13,
+                                                      fontSize: 10,
                                                       color: isDark ? Colors.grey[500] : Colors.grey[500],
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                               trailing: Container(
-                                                padding: const EdgeInsets.all(8),
+                                                padding: const EdgeInsets.all(4),
                                                 decoration: BoxDecoration(
                                                   color: const Color(0xFF7E57C2).withOpacity(0.1),
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius: BorderRadius.circular(4),
                                                 ),
                                                 child: Icon(
                                                   Icons.arrow_forward_ios,
                                                   color: const Color(0xFF7E57C2),
-                                                  size: 16,
+                                                  size: 12,
                                                 ),
                                               ),
                                               onTap: () {
