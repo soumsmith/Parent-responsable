@@ -237,7 +237,7 @@ class MoreScreen extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ShopScreen()),
+                MaterialPageRoute(builder: (_) => const LibraryScreen()),
               );
             },
           ),
