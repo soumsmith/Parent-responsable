@@ -15,7 +15,13 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  FirebaseMessaging get _firebaseMessaging {
+    try {
+      return FirebaseMessaging.instance;
+    } catch (e) {
+      throw Exception('Firebase not initialized. Make sure Firebase.initializeApp() has been called.');
+    }
+  }
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
   final PoulsScolaireApiService _apiService = PoulsScolaireApiService();
 
