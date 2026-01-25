@@ -46,6 +46,20 @@ class AppColors {
   static const Color black54 = Color(0x8A000000);
   static const Color black38 = Color(0x61000000);
   static const Color black12 = Color(0x1F000000);
+  
+  /// Couleurs de fond pures pour les écrans
+  static const Color pureWhite = Color(0xFFFFFFFF);
+  static const Color pureBlack = Color(0xFF000000);
+  
+  /// Obtenir la couleur de fond pure selon le thème
+  static Color getPureBackground(bool isDark) {
+    return isDark ? pureBlack : pureWhite;
+  }
+  
+  /// Obtenir la couleur de fond pure pour l'AppBar selon le thème
+  static Color getPureAppBarBackground(bool isDark) {
+    return isDark ? pureBlack : pureWhite;
+  }
 
   // ============= COULEURS FONCTIONNELLES =============
   

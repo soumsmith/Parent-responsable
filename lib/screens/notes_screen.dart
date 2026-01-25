@@ -682,30 +682,23 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     final isDarkMode = _themeService.isDarkMode;
     
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: isDarkMode
-              ? [
-                  const Color(0xFF121212),
-                  const Color(0xFF1E1E1E),
-                ]
-              : [
-                  Colors.white,
-                  const Color(0xFFE3F2FD), // Bleu clair selon maquette
-                ],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 16),
-            // Tableau des notes (avec message et filtres intégrés)
-            if (_isLoading)
+    return Scaffold(
+      backgroundColor: AppColors.getPureBackground(isDarkMode),
+      body: _buildBody(),
+    );
+  }
+  
+  Widget _buildBody() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 16),
+          // Tableau des notes (avec message et filtres intégrés)
+          if (_isLoading)
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(24),
@@ -789,8 +782,7 @@ class _NotesScreenState extends State<NotesScreen> {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildNotesTable() {

@@ -28,6 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadChildren();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Recharger les enfants lorsque la page devient visible (utile après vérification OTP)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChildren();
+    });
+  }
+
   Future<void> _loadChildren() async {
     setState(() {
       _isLoading = true;
@@ -35,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
+      // Rafraîchir l'utilisateur actuel (utile après reconnexion)
+      MainScreenWrapper.of(context).refreshCurrentUser();
+      
       final parentId = MainScreenWrapper.of(context).currentUserId ?? 'parent1';
       
       // Charger depuis l'API (qui charge maintenant depuis la base de données locale)
@@ -108,20 +120,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      backgroundColor: AppColors.getPureBackground(isDark),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Pouls École',
           style: TextStyle(
             color: AppColors.getTextColor(isDark),
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
         ),
         automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: AppColors.transparent,
+        backgroundColor: AppColors.getPureAppBarBackground(isDark),
+        surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.getTextColor(isDark),
         actions: [
           IconButton(
@@ -185,19 +198,23 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: isDark
                 ? [
-                    AppColors.backgroundDark,
-                    AppColors.surfaceDark,
-                    AppColors.primaryDark,
-                  ]
+              AppColors.primary.withOpacity(0),
+              AppColors.primary.withOpacity(0),
+              AppColors.primary.withOpacity(0.3),
+              AppColors.getPureAppBarBackground(true),
+
+            ]
                 : [
-                    AppColors.primaryLight.withOpacity(0.1),
-                    AppColors.primaryLight.withOpacity(0.05),
-                    AppColors.white,
-                  ],
+              AppColors.primary.withOpacity(0),
+              AppColors.primary.withOpacity(0),
+              AppColors.primary.withOpacity(0.3),
+              AppColors.getPureAppBarBackground(false),
+
+            ],
           ),
         ),
         child: SafeArea(
@@ -229,25 +246,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 1.3,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // Stats cards
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  AppColors.primaryLight.withOpacity(0.2),
-                                  AppColors.primary.withOpacity(0.1),
-                                ],
+                                colors: isDark
+                                    ? [
+                                        AppColors.primaryDark.withOpacity(0.3),
+                                        AppColors.primaryDark.withOpacity(0.1),
+                                      ]
+                                    : [
+                                        AppColors.primaryLight.withOpacity(0.2),
+                                        AppColors.primary.withOpacity(0.1),
+                                      ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: AppColors.primary.withOpacity(0.3),
+                                color: isDark
+                                    ? AppColors.primaryDark.withOpacity(0.5)
+                                    : AppColors.primary.withOpacity(0.3),
                                 width: 1,
                               ),
                             ),
@@ -255,22 +279,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Icon(
                                     Icons.family_restroom,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: 16,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                                 Text(
                                   '${_children.length}',
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primary,
                                   ),
@@ -278,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   'Enfants',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -290,19 +314,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  AppColors.secondaryLight.withOpacity(0.2),
-                                  AppColors.secondary.withOpacity(0.1),
-                                ],
+                                colors: isDark
+                                    ? [
+                                        AppColors.secondaryDark.withOpacity(0.3),
+                                        AppColors.secondaryDark.withOpacity(0.1),
+                                      ]
+                                    : [
+                                        AppColors.secondaryLight.withOpacity(0.2),
+                                        AppColors.secondary.withOpacity(0.1),
+                                      ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: AppColors.secondary.withOpacity(0.3),
+                                color: isDark
+                                    ? AppColors.secondaryDark.withOpacity(0.5)
+                                    : AppColors.secondary.withOpacity(0.3),
                                 width: 1,
                               ),
                             ),
@@ -310,30 +341,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
                                     color: AppColors.secondary,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Icon(
                                     Icons.school,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: 16,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                                 Text(
-                                  'Actif',
+                                  '3',
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.secondary,
                                   ),
                                 ),
                                 Text(
-                                  'Statut',
+                                  'Classes',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -347,12 +378,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               // Section enfants
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.getSurfaceColor(isDark),
+                    color: AppColors.getPureBackground(isDark),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(32),
                       topRight: Radius.circular(32),
@@ -360,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Column(
                     children: [
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22),
                         child: Row(
@@ -368,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               'Mes Enfants',
                               style: TextStyle(
-                                fontSize: 17,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.getTextColor(isDark),
                               ),
@@ -530,21 +561,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           return Container(
                                             margin: const EdgeInsets.only(bottom: 8),
                                             decoration: BoxDecoration(
-                                              color: AppColors.getSurfaceColor(isDark),
+                                              color: AppColors.getPureBackground(isDark),
                                               borderRadius: BorderRadius.circular(16),
                                               border: Border.all(
-                                                color: AppColors.getBorderColor(isDark),
+                                                color: isDark
+                                                    ? AppColors.grey700.withOpacity(0.3)
+                                                    : AppColors.grey200.withOpacity(0.5),
                                                 width: 1,
                                               ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: isDark
-                                                      ? AppColors.black.withOpacity(0.08)
-                                                      : AppColors.shadowLight,
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
                                             ),
                                             child: ListTile(
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

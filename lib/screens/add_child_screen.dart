@@ -433,7 +433,7 @@ class _AddChildScreenState extends State<AddChildScreen>
     final isDarkMode = _themeService.isDarkMode;
     
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF0F0F0F) : const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.getPureBackground(isDarkMode),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -477,13 +477,15 @@ class _AddChildScreenState extends State<AddChildScreen>
 
   Widget _buildSliverAppBar() {
     final theme = Theme.of(context);
+    final isDarkMode = _themeService.isDarkMode;
     
     return SliverAppBar(
       expandedHeight: 20,
       floating: false,
       pinned: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.getPureAppBarBackground(isDarkMode),
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         title: const Text(
           'Ajouter un élève',

@@ -191,9 +191,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      backgroundColor: AppColors.getPureBackground(isDark),
       appBar: AppBar(
-        backgroundColor: AppColors.transparent,
+        backgroundColor: AppColors.getPureAppBarBackground(isDark),
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(
@@ -216,12 +218,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             end: Alignment.bottomCenter,
             colors: isDark
                 ? [
-                    AppColors.backgroundDark,
-                    AppColors.surfaceDark,
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0.3),
+                    AppColors.getPureAppBarBackground(true),
                   ]
                 : [
-                    AppColors.white,
-                    AppColors.primaryLight.withOpacity(0.05),
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0.3),
+                    AppColors.getPureAppBarBackground(false),
                   ],
           ),
         ),
@@ -282,26 +288,28 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(6, (index) {
-                    return SizedBox(
+                    return Container(
                       width: 45,
                       height: 60,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.grey800 : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: TextField(
                         controller: _otpControllers[index],
                         focusNode: _focusNodes[index],
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
                         maxLength: 1,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                         decoration: InputDecoration(
                           counterText: '',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
                         ),
                         onChanged: (value) => _handleOtpChange(index, value),
                       ),

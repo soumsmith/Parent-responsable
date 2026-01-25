@@ -281,7 +281,7 @@ class _ChildListScreenState extends State<ChildListScreen>
     final isDarkMode = _themeService.isDarkMode;
     
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.getPureBackground(isDarkMode),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -337,13 +337,16 @@ class _ChildListScreenState extends State<ChildListScreen>
 
   Widget _buildSliverAppBar() {
     final theme = Theme.of(context);
+    final isDarkMode = _themeService.isDarkMode;
     
     return SliverAppBar(
       expandedHeight: 20,
       floating: false,
       pinned: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.getPureAppBarBackground(isDarkMode),
       elevation: 0,
+      forceElevated: false,
+      surfaceTintColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.child.fullName,

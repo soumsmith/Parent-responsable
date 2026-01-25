@@ -4,6 +4,7 @@ import '../models/message.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../widgets/custom_card.dart';
+import '../config/app_colors.dart';
 
 /// Écran de messagerie - Affiche uniquement les notifications FCM reçues
 class MessagesScreen extends StatefulWidget {
@@ -53,6 +54,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Scaffold(
+      backgroundColor: AppColors.getPureBackground(isDark),
+      body: _buildBody(),
+    );
+  }
+  
+  Widget _buildBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }

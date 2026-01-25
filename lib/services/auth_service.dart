@@ -110,7 +110,7 @@ class AuthService {
         _token = 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}';
         final remainingCredits = _phoneCredits[phone] ?? 0;
         _currentUser = User(
-          id: 'parent_${DateTime.now().millisecondsSinceEpoch}',
+          id: 'parent_${phone.replaceAll(RegExp(r'[^0-9]'), '')}', // ID basé sur le téléphone
           email: '$phone@parent.local',
           firstName: 'Parent',
           lastName: 'Utilisateur',
@@ -145,7 +145,7 @@ class AuthService {
         _token = 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}';
         final remainingCredits = _phoneCredits[phone] ?? 0;
         _currentUser = User(
-          id: 'parent_${DateTime.now().millisecondsSinceEpoch}',
+          id: 'parent_${phone.replaceAll(RegExp(r'[^0-9]'), '')}', // ID basé sur le téléphone
           email: '$phone@parent.local',
           firstName: 'Parent',
           lastName: 'Utilisateur',
@@ -369,7 +369,7 @@ class AuthService {
       final remainingCredits = _phoneCredits[phone] ?? 0;
       
       _currentUser = User(
-        id: 'parent_${DateTime.now().millisecondsSinceEpoch}',
+        id: 'parent_${phone.replaceAll(RegExp(r'[^0-9]'), '')}', // ID basé sur le téléphone
         email: email ?? '$phone@parent.local',
         firstName: firstName,
         lastName: lastName,
@@ -398,7 +398,7 @@ class AuthService {
       
       _token = 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}';
       _currentUser = User(
-        id: 'parent_${DateTime.now().millisecondsSinceEpoch}',
+        id: 'parent_${phone.replaceAll(RegExp(r'[^0-9]'), '')}', // ID basé sur le téléphone
         email: email ?? '$phone@parent.local',
         firstName: firstName,
         lastName: lastName,

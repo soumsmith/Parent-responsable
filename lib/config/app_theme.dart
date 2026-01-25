@@ -37,9 +37,10 @@ class AppTheme {
       
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.transparent,
+        backgroundColor: AppColors.pureWhite,
         foregroundColor: AppColors.textPrimaryLight,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: AppColors.transparent,
@@ -448,9 +449,10 @@ class AppTheme {
       
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.transparent,
+        backgroundColor: AppColors.pureBlack,
         foregroundColor: AppColors.textPrimaryDark,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: AppColors.transparent,

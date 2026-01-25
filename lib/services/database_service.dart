@@ -254,12 +254,6 @@ class DatabaseService {
       orderBy: 'createdAt DESC',
     );
 
-    print('📂 getChildrenByParent: ${maps.length} enfant(s) trouvé(s)');
-    for (final map in maps) {
-      final childMap = Map<String, dynamic>.from(map);
-      print('   - ${childMap['firstName']} ${childMap['lastName']}: photoUrl = ${childMap['photoUrl'] ?? "null"}');
-    }
-
     return maps.map((map) {
       return Child.fromJson(Map<String, dynamic>.from(map));
     }).toList();

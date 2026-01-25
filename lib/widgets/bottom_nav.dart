@@ -18,7 +18,7 @@ class BottomNav extends StatelessWidget {
     
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.getSurfaceColor(isDark),
+        color: AppColors.getPureBackground(isDark),
         boxShadow: [
           BoxShadow(
             color: isDark 

@@ -108,6 +108,12 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
   ApiService get apiService => _apiService;
   String? get currentUserId => _currentUserId;
 
+  /// Met à jour l'utilisateur actuel (utile après reconnexion)
+  void refreshCurrentUser() {
+    final user = AuthService.instance.getCurrentUser();
+    _currentUserId = user?.id;
+  }
+
   void _onTabTapped(int index) {
     if (index == 3) {
       showMenuBottomSheet(context);
