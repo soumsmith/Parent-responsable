@@ -12,7 +12,8 @@ import '../services/api_service.dart';
 import '../services/pouls_scolaire_api_service.dart';
 import '../services/database_service.dart';
 import '../services/theme_service.dart';
-import '../app.dart';
+import '../config/app_colors.dart';
+import '../widgets/main_screen_wrapper.dart';
 import 'notes_screen.dart';
 import 'timetable_screen.dart';
 import 'messages_screen.dart';
@@ -191,7 +192,7 @@ class _ChildListScreenState extends State<ChildListScreen>
     });
 
     try {
-      final apiService = App.of(context).apiService;
+      final apiService = MainScreenWrapper.of(context).apiService;
       
       // Étape 1: Charger les informations de l'enfant d'abord
       print('📂 Étape 1: Récupération des informations de l\'enfant...');
@@ -202,7 +203,7 @@ class _ChildListScreenState extends State<ChildListScreen>
       final results = await Future.wait([
         apiService.getNotesForChild(widget.child.id),
         apiService.getTimetableForChild(widget.child.id),
-        apiService.getMessages(App.of(context).currentUserId ?? 'parent1'),
+        apiService.getMessages(MainScreenWrapper.of(context).currentUserId ?? 'parent1'),
         apiService.getFeesForChild(widget.child.id),
       ]);
 
@@ -335,48 +336,32 @@ class _ChildListScreenState extends State<ChildListScreen>
   }
 
   Widget _buildSliverAppBar() {
-    final isDarkMode = _themeService.isDarkMode;
+    final theme = Theme.of(context);
     
     return SliverAppBar(
       expandedHeight: 20,
       floating: false,
       pinned: true,
-      backgroundColor: isDarkMode ? const Color(0xFF1A1A2E) : const Color(0xFF4F46E5),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.child.fullName,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.textTheme.titleLarge?.color,
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
         ),
         titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      const Color(0xFF1A1A2E),
-                      const Color(0xFF2D2D44),
-                    ]
-                  : [
-                      const Color(0xFF4F46E5),
-                      const Color(0xFF7C3AED),
-                    ],
-            ),
-          ),
-        ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+          icon: Icon(Icons.notifications_outlined, color: theme.iconTheme.color),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
           onPressed: () {},
         ),
       ],
@@ -384,21 +369,17 @@ class _ChildListScreenState extends State<ChildListScreen>
   }
 
   Widget _buildProfileHeader() {
-    final isDarkMode = _themeService.isDarkMode;
-    
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        gradient: AppColors.warningGradient,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.3)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: AppColors.warning.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -411,9 +392,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-                  ),
+                  gradient: AppColors.primaryGradient,
                 ),
                 child: widget.child.photoUrl != null
                     ? ClipOval(
@@ -434,27 +413,27 @@ class _ChildListScreenState extends State<ChildListScreen>
                   children: [
                     Text(
                       widget.child.fullName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       widget.child.grade,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
-                        color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+                        color: Colors.white70,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       widget.child.establishment,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
-                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF9CA3AF),
+                        color: Colors.white60,
                       ),
                     ),
                   ],
@@ -465,11 +444,11 @@ class _ChildListScreenState extends State<ChildListScreen>
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildStatusBadge('⭐ Excellent', Colors.green),
+              _buildStatusBadge('⭐ Excellent', AppColors.success),
               const SizedBox(width: 8),
-              _buildStatusBadge('✔ Assidu', Colors.blue),
+              _buildStatusBadge('✔ Assidu', AppColors.primary),
               const SizedBox(width: 8),
-              _buildStatusBadge('📈 Progression', Colors.orange),
+              _buildStatusBadge('📈 Progression', AppColors.secondary),
             ],
           ),
         ],
@@ -489,16 +468,23 @@ class _ChildListScreenState extends State<ChildListScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: color,
+          color: Color(0xFF333333),
         ),
       ),
     );
@@ -540,7 +526,7 @@ class _ChildListScreenState extends State<ChildListScreen>
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildSummaryCard('Présence', '95%', Colors.green, Icons.check_circle)),
+              Expanded(child: _buildSummaryCard('Présence', '95%', AppColors.success, Icons.check_circle)),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildSummaryCard(
@@ -548,7 +534,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                   _globalAverage != null 
                     ? _globalAverage!.trimesterMention
                     : '--',
-                  Colors.orange, 
+                  AppColors.secondary, 
                   Icons.star,
                   isLoading: _isLoadingNotes,
                 ),
@@ -567,13 +553,13 @@ class _ChildListScreenState extends State<ChildListScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        color: AppColors.getSurfaceColor(isDarkMode),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: isDarkMode 
-                ? Colors.black.withOpacity(0.3)
-                : Colors.black.withOpacity(0.05),
+                ? AppColors.black.withOpacity(0.3)
+                : AppColors.shadowLight,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -616,7 +602,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: AppColors.getTextColor(isDarkMode, type: TextType.secondary).withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -637,7 +623,7 @@ class _ChildListScreenState extends State<ChildListScreen>
             title,
             style: TextStyle(
               fontSize: 14,
-              color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+              color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -647,6 +633,8 @@ class _ChildListScreenState extends State<ChildListScreen>
   }
 
   Widget _buildPersistentTabBar() {
+    final isDarkMode = _themeService.isDarkMode;
+    
     return SliverPersistentHeader(
       pinned: true,
       delegate: _TabBarDelegate(
@@ -654,10 +642,10 @@ class _ChildListScreenState extends State<ChildListScreen>
           controller: _tabController,
           isScrollable: true,
           labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFF6B7280),
+          unselectedLabelColor: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
           indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: const Color(0xFF4F46E5),
+            gradient: AppColors.primaryGradient,
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           labelStyle: const TextStyle(
@@ -689,8 +677,8 @@ class _ChildListScreenState extends State<ChildListScreen>
       animation: _tabController,
       builder: (context, _) {
         return Container(
-          height: 45,
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          height: 35,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 7,
@@ -701,30 +689,22 @@ class _ChildListScreenState extends State<ChildListScreen>
                   _tabController.animateTo(index);
                 },
                 child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  margin: const EdgeInsets.only(right: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     gradient: isSelected
-                        ? const LinearGradient(
-                      colors: [Color(0xFFff631d), Color(0xFFff9a42)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    )
+                        ? AppColors.primaryGradient
                         : null,
                     color: !isSelected
-                        ? (isDarkMode ? const Color(0xFF1E1E1E) : Colors.white)
+                        ? AppColors.getSurfaceColor(isDarkMode)
                         : null,
-                    borderRadius: BorderRadius.circular(15),
-                    border: !isSelected ? Border.all(
-                      color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE2E8F0),
-                      width: 1,
-                    ) : null,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: isSelected
                         ? [
                       BoxShadow(
-                        color: const Color(0xFFff631d).withOpacity(0.4),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
                     ]
                         : [],
@@ -734,20 +714,20 @@ class _ChildListScreenState extends State<ChildListScreen>
                     children: [
                       Icon(
                         _getTabIcon(index),
-                        size: 18,
+                        size: 16,
                         color: isSelected
                             ? Colors.white
-                            : (isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+                            : AppColors.getTextColor(isDarkMode, type: TextType.secondary),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Text(
                         _getTabTitle(index),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                           color: isSelected
                               ? Colors.white
-                              : (isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+                              : AppColors.getTextColor(isDarkMode, type: TextType.secondary),
                         ),
                       ),
                     ],
@@ -1362,10 +1342,10 @@ class _CustomTabBarDelegate extends SliverPersistentHeaderDelegate {
   _CustomTabBarDelegate(this._child);
 
   @override
-  double get minExtent => 77.0; // 45 height + 16 vertical padding + 16 margin
+  double get minExtent => 59.0; // 35 height + 12 vertical padding + 12 margin
 
   @override
-  double get maxExtent => 77.0;
+  double get maxExtent => 59.0; // 35 height + 12 vertical padding + 12 margin
 
   @override
   Widget build(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/child.dart';
+import '../config/app_colors.dart';
 import 'custom_card.dart';
 
 /// Widget pour afficher un enfant dans une carte
@@ -15,6 +16,9 @@ class ChildItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     // Log pour déboguer
     final childName = child.fullName;
     final photoUrl = child.photoUrl;
@@ -35,7 +39,7 @@ class ChildItem extends StatelessWidget {
                 height: 60,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.black, width: 1),
+                  border: Border.all(color: AppColors.getBorderColor(isDark), width: 1),
                 ),
                 child: photoUrl != null && photoUrl.isNotEmpty
                     ? ClipOval(
@@ -53,11 +57,11 @@ class ChildItem extends StatelessWidget {
                             print('   Erreur: $error');
                             print('   StackTrace: $stackTrace');
                             return Container(
-                              color: const Color(0xFFE3F2FD), // Bleu clair
+                              color: AppColors.primaryLight.toSurface(),
                               child: Icon(
                                 Icons.person,
                                 size: 30,
-                                color: Colors.grey[600],
+                                color: AppColors.getTextColor(isDark, type: TextType.secondary),
                               ),
                             );
                           },
@@ -75,11 +79,12 @@ class ChildItem extends StatelessWidget {
                               print('⏳ Chargement de la photo pour $childName: ${(progress * 100).toStringAsFixed(0)}%');
                             }
                             return Container(
-                              color: const Color(0xFFE3F2FD), // Bleu clair
+                              color: AppColors.primaryLight.toSurface(),
                               child: Center(
                                 child: CircularProgressIndicator(
                                   value: progress,
                                   strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                                 ),
                               ),
                             );
@@ -88,11 +93,11 @@ class ChildItem extends StatelessWidget {
                       )
                     : Container(
                         // Placeholder si pas de photo
-                        color: const Color(0xFFE3F2FD), // Bleu clair
+                        color: AppColors.primaryLight.toSurface(),
                         child: Icon(
                           Icons.person,
                           size: 30,
-                          color: Colors.grey[600],
+                          color: AppColors.getTextColor(isDark, type: TextType.secondary),
                         ),
                       ),
               ),
@@ -105,44 +110,45 @@ class ChildItem extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 1),
+                        border: Border.all(color: AppColors.primary, width: 1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         child.fullName,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: AppColors.getTextColor(isDark),
                             ),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Nom de l'établissement (en rouge selon maquette)
+                    // Nom de l'établissement
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 1),
+                        border: Border.all(color: AppColors.primary, width: 1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         child.establishment,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.red,
+                              color: AppColors.secondary,
                               fontWeight: FontWeight.w500,
                             ),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Classe (en rouge selon maquette)
+                    // Classe
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 1),
+                        border: Border.all(color: AppColors.primary, width: 1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         'Classe: ${child.grade}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.red,
+                              color: AppColors.secondary,
                               fontWeight: FontWeight.w500,
                             ),
                       ),
@@ -153,10 +159,13 @@ class ChildItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Bouton "Voir plus" centré selon maquette
+          // Bouton "Voir plus" centré
           Center(
             child: TextButton(
               onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
               child: const Text('Voir plus'),
             ),
           ),

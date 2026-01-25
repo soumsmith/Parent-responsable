@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 
 /// Bouton personnalisé avec style de l'application
 class CustomButton extends StatelessWidget {
@@ -24,8 +25,9 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bgColor = backgroundColor ?? theme.colorScheme.primary;
-    final txtColor = textColor ?? Colors.white;
+    final isDark = theme.brightness == Brightness.dark;
+    final bgColor = backgroundColor ?? AppColors.primary;
+    final txtColor = textColor ?? AppColors.white;
 
     return SizedBox(
       width: width ?? double.infinity,
@@ -38,7 +40,10 @@ class CustomButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 2,
+          elevation: isDark ? 4 : 2,
+          shadowColor: isDark 
+              ? AppColors.black.withOpacity(0.3)
+              : AppColors.primary.withOpacity(0.2),
         ),
         child: isLoading
             ? SizedBox(

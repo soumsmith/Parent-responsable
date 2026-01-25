@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../app.dart';
 import '../widgets/custom_button.dart';
+import '../config/app_colors.dart';
 
 /// Écran de vérification OTP
 class OtpVerificationScreen extends StatefulWidget {
@@ -187,19 +188,41 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vérification OTP'),
+        backgroundColor: AppColors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.getTextColor(isDark),
+          ),
+        ),
+        title: Text(
+          'Vérification OTP',
+          style: TextStyle(
+            color: AppColors.getTextColor(isDark),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-            ],
+            colors: isDark
+                ? [
+                    AppColors.backgroundDark,
+                    AppColors.surfaceDark,
+                  ]
+                : [
+                    AppColors.white,
+                    AppColors.primaryLight.withOpacity(0.05),
+                  ],
           ),
         ),
         child: SafeArea(
@@ -215,37 +238,43 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppColors.primary.toSurface(),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.sms,
                       size: 50,
-                      color: Colors.white,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 Text(
                   'VÉRIFICATION',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.getTextColor(isDark),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Entrez le code à 6 chiffres envoyé au',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.phone,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),

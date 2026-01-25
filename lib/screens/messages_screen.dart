@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../widgets/main_screen_wrapper.dart';
+import '../models/message.dart';
+import '../services/api_service.dart';
 import '../services/database_service.dart';
-import '../app.dart';
 import '../widgets/custom_card.dart';
 
 /// Écran de messagerie - Affiche uniquement les notifications FCM reçues
@@ -27,7 +29,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     });
 
     try {
-      final parentId = App.of(context).currentUserId ?? 'parent1';
+      final parentId = MainScreenWrapper.of(context).currentUserId ?? 'parent1';
       
       // Charger uniquement les notifications FCM depuis la base de données
       final databaseService = DatabaseService.instance;

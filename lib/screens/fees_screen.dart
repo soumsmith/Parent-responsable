@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/fee.dart';
 import '../services/api_service.dart';
-import '../app.dart';
+import '../widgets/main_screen_wrapper.dart';
 import '../widgets/custom_card.dart';
 
 /// Écran d'affichage des frais de scolarité
@@ -33,7 +33,7 @@ class _FeesScreenState extends State<FeesScreen> {
     });
 
     try {
-      final apiService = App.of(context).apiService;
+      final apiService = MainScreenWrapper.of(context).apiService;
       final fees = await apiService.getFeesForChild(widget.childId);
       
       setState(() {

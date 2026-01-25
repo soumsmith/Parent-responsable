@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../services/pouls_scolaire_api_service.dart';
 import '../services/database_service.dart';
 import '../services/theme_service.dart';
+import '../config/app_colors.dart';
 import '../app.dart';
 import '../widgets/custom_card.dart';
 
@@ -723,34 +724,49 @@ class _NotesScreenState extends State<NotesScreen> {
               const SizedBox(height: 16),
             ] else if (_allSubjectAverages.isEmpty && !_isLoadingNotes) ...[
               Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.assignment_outlined,
-                        size: 64,
-                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.assignment_outlined,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Aucune note disponible',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'ChildId: ${widget.childId}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 36,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _loadData(trimester: _selectedTrimester, year: _selectedYear),
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('Actualiser', style: TextStyle(fontSize: 12)),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: Size.zero,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune note disponible',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'ChildId: ${widget.childId}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ] else
@@ -760,7 +776,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   child: Text(
                     'Aucune matière ne correspond aux filtres sélectionnés',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: _themeService.isDarkMode ? Colors.grey[300] : Colors.grey[600],
+                          color: AppColors.getTextColor(_themeService.isDarkMode, type: TextType.secondary),
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -794,19 +810,19 @@ class _NotesScreenState extends State<NotesScreen> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              color: AppColors.getSurfaceColor(isDarkMode),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   color: isDarkMode 
-                      ? Colors.black.withOpacity(0.3)
-                      : Colors.black.withOpacity(0.03),
+                      ? AppColors.black.withOpacity(0.3)
+                      : AppColors.shadowLight,
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
               ],
               border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 width: 1,
               ),
             ),
@@ -816,22 +832,22 @@ class _NotesScreenState extends State<NotesScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5).withOpacity(0.1),
+                    color: AppColors.primary.toSurface(),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.info_outline,
-                    color: Color(0xFF4F46E5),
+                    color: AppColors.primary,
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: const Text(
+                  child: Text(
                     'Cher parents,\nMerci de vous impliquer régulièrement dans le suivi et l\'amélioration du résultat scolaire de votre enfant.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF4B5563),
+                      color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
                       height: 1.5,
                     ),
                   ),
@@ -845,13 +861,13 @@ class _NotesScreenState extends State<NotesScreen> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              color: AppColors.getSurfaceColor(isDarkMode),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   color: isDarkMode 
-                      ? Colors.black.withOpacity(0.3)
-                      : Colors.black.withOpacity(0.03),
+                      ? AppColors.black.withOpacity(0.3)
+                      : AppColors.shadowLight,
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -1057,14 +1073,14 @@ class _NotesScreenState extends State<NotesScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF4F46E5),
+              gradient: AppColors.primaryGradient,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.2),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

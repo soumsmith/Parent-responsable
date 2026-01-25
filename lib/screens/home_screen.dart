@@ -3,8 +3,9 @@ import '../models/child.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/pouls_scolaire_api_service.dart';
-import '../app.dart';
+import '../widgets/main_screen_wrapper.dart';
 import '../widgets/section_title.dart';
+import '../config/app_colors.dart';
 import 'child_list_screen.dart';
 import 'add_child_screen.dart';
 
@@ -34,10 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final parentId = App.of(context).currentUserId ?? 'parent1';
+      final parentId = MainScreenWrapper.of(context).currentUserId ?? 'parent1';
       
       // Charger depuis l'API (qui charge maintenant depuis la base de données locale)
-      final apiService = App.of(context).apiService;
+      final apiService = MainScreenWrapper.of(context).apiService;
       final children = await apiService.getChildrenForParent(parentId);
       
       // Mettre à jour les photos manquantes pour les enfants existants
@@ -112,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           'Pouls École',
           style: TextStyle(
-            color: isDark ? Colors.white : const Color(0xFF1A237E),
+            color: AppColors.getTextColor(isDark),
             fontSize: 24,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
@@ -120,8 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: isDark ? Colors.white : const Color(0xFF1A237E),
+        backgroundColor: AppColors.transparent,
+        foregroundColor: AppColors.getTextColor(isDark),
         actions: [
           IconButton(
             onPressed: () {
@@ -130,14 +131,12 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isDark 
-                    ? Colors.white.withOpacity(0.1)
-                    : const Color(0xFF1A237E).withOpacity(0.1),
+                color: AppColors.primary.toSurface(),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.notifications_outlined,
-                color: isDark ? Colors.white : const Color(0xFF1A237E),
+                color: AppColors.primary,
                 size: 20,
               ),
             ),
@@ -147,15 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7E57C2).withOpacity(0.3),
+              color: AppColors.primary.withOpacity(0.3),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -172,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _loadChildren();
             }
           },
-          backgroundColor: Colors.transparent,
+          backgroundColor: AppColors.transparent,
           elevation: 0,
           icon: const Icon(Icons.add, size: 20),
           label: Text(
@@ -181,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
-              color: isDark ? Colors.white : const Color(0xFF1A237E),
+              color: AppColors.white,
             ),
           ),
         ),
@@ -194,14 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
             end: Alignment.bottomRight,
             colors: isDark
                 ? [
-                    const Color(0xFF0F0F0F),
-                    const Color(0xFF1A1A2E),
-                    const Color(0xFF16213E),
+                    AppColors.backgroundDark,
+                    AppColors.surfaceDark,
+                    AppColors.primaryDark,
                   ]
                 : [
-                    const Color(0xFFE8EAF6),
-                    const Color(0xFFC5CAE9),
-                    const Color(0xFF9FA8DA),
+                    AppColors.primaryLight.withOpacity(0.1),
+                    AppColors.primaryLight.withOpacity(0.05),
+                    AppColors.white,
                   ],
           ),
         ),
@@ -220,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w300,
-                        color: isDark ? Colors.white70 : const Color(0xFF283593),
+                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
                         height: 1.2,
                       ),
                     ),
@@ -230,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF1A237E),
+                        color: AppColors.getTextColor(isDark),
                         height: 1.3,
                       ),
                     ),
@@ -244,15 +239,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  const Color(0xFF81C784).withOpacity(0.2),
-                                  const Color(0xFF66BB6A).withOpacity(0.1),
+                                  AppColors.primaryLight.withOpacity(0.2),
+                                  AppColors.primary.withOpacity(0.1),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF81C784).withOpacity(0.3),
+                                color: AppColors.primary.withOpacity(0.3),
                                 width: 1,
                               ),
                             ),
@@ -262,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF81C784),
+                                    color: AppColors.primary,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -277,14 +272,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF2E7D32),
+                                    color: AppColors.primary,
                                   ),
                                 ),
                                 Text(
                                   'Enfants',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: isDark ? Colors.white70 : const Color(0xFF2E7D32),
+                                    color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -299,15 +294,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  const Color(0xFF64B5F6).withOpacity(0.2),
-                                  const Color(0xFF42A5F5).withOpacity(0.1),
+                                  AppColors.secondaryLight.withOpacity(0.2),
+                                  AppColors.secondary.withOpacity(0.1),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF64B5F6).withOpacity(0.3),
+                                color: AppColors.secondary.withOpacity(0.3),
                                 width: 1,
                               ),
                             ),
@@ -317,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF64B5F6),
+                                    color: AppColors.secondary,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -332,14 +327,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF1976D2),
+                                    color: AppColors.secondary,
                                   ),
                                 ),
                                 Text(
                                   'Statut',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: isDark ? Colors.white70 : const Color(0xFF1976D2),
+                                    color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -357,9 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark 
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.8),
+                    color: AppColors.getSurfaceColor(isDark),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(32),
                       topRight: Radius.circular(32),
@@ -377,14 +370,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? Colors.white : const Color(0xFF1A237E),
+                                color: AppColors.getTextColor(isDark),
                               ),
                             ),
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7E57C2).withOpacity(0.1),
+                                color: AppColors.primary.toSurface(),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -392,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF7E57C2),
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
@@ -411,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Icon(
                                           Icons.error_outline,
                                           size: 64,
-                                          color: isDark ? Colors.red[300] : Colors.red[400],
+                                          color: AppColors.error,
                                         ),
                                         const SizedBox(height: 16),
                                         Text(
@@ -419,23 +412,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
-                                            color: isDark ? Colors.white : Colors.black87,
+                                            color: AppColors.getTextColor(isDark),
                                           ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
                                           _error!,
                                           style: TextStyle(
-                                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                            color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 24),
                                         Container(
                                           decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
-                                            ),
+                                            gradient: AppColors.primaryGradient,
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: ElevatedButton(
@@ -470,8 +461,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      const Color(0xFF7E57C2).withOpacity(0.15),
-                                                      const Color(0xFF5E35B1).withOpacity(0.08),
+                                                      AppColors.primaryLight.withOpacity(0.15),
+                                                      AppColors.primary.withOpacity(0.08),
                                                     ],
                                                   ),
                                                   borderRadius: BorderRadius.circular(30),
@@ -479,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 child: Icon(
                                                   Icons.child_care,
                                                   size: 32,
-                                                  color: const Color(0xFF7E57C2),
+                                                  color: AppColors.primary,
                                                 ),
                                               ),
                                               const SizedBox(height: 16),
@@ -488,7 +479,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w700,
-                                                  color: isDark ? Colors.white : const Color(0xFF1A237E),
+                                                  color: AppColors.getTextColor(isDark),
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
@@ -496,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 'Ajoutez votre premier enfant\npour suivre son évolution',
                                                 style: TextStyle(
                                                   fontSize: 13,
-                                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                                  color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                                   height: 1.3,
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -504,9 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               const SizedBox(height: 20),
                                               Container(
                                                 decoration: BoxDecoration(
-                                                  gradient: const LinearGradient(
-                                                    colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
-                                                  ),
+                                                  gradient: AppColors.primaryGradient,
                                                   borderRadius: BorderRadius.circular(10),
                                                 ),
                                                 child: ElevatedButton.icon(
@@ -541,21 +530,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                           return Container(
                                             margin: const EdgeInsets.only(bottom: 8),
                                             decoration: BoxDecoration(
-                                              color: isDark 
-                                                  ? Colors.white.withOpacity(0.05)
-                                                  : Colors.white,
+                                              color: AppColors.getSurfaceColor(isDark),
                                               borderRadius: BorderRadius.circular(16),
                                               border: Border.all(
-                                                color: isDark 
-                                                    ? Colors.white.withOpacity(0.1)
-                                                    : Colors.grey.withOpacity(0.2),
+                                                color: AppColors.getBorderColor(isDark),
                                                 width: 1,
                                               ),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: isDark
-                                                      ? Colors.black.withOpacity(0.08)
-                                                      : Colors.black.withOpacity(0.04),
+                                                      ? AppColors.black.withOpacity(0.08)
+                                                      : AppColors.shadowLight,
                                                   blurRadius: 8,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -567,12 +552,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 width: 42,
                                                 height: 42,
                                                 decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    colors: [
-                                                      const Color(0xFF7E57C2),
-                                                      const Color(0xFF5E35B1),
-                                                    ],
-                                                  ),
+                                                  gradient: AppColors.primaryGradient,
                                                   borderRadius: BorderRadius.circular(10),
                                                 ),
                                                 child: child.photoUrl != null && child.photoUrl!.isNotEmpty
@@ -601,7 +581,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w700,
-                                                  color: isDark ? Colors.white : const Color(0xFF1A237E),
+                                                  color: AppColors.getTextColor(isDark),
                                                 ),
                                               ),
                                               subtitle: Column(
@@ -612,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     child.establishment.isNotEmpty ? child.establishment : 'Établissement non renseigné',
                                                     style: TextStyle(
                                                       fontSize: 11,
-                                                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                                      color: AppColors.getTextColor(isDark, type: TextType.secondary),
                                                       fontWeight: FontWeight.w500,
                                                     ),
                                                   ),
@@ -620,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     child.grade.isNotEmpty ? child.grade : 'Classe non renseignée',
                                                     style: TextStyle(
                                                       fontSize: 10,
-                                                      color: isDark ? Colors.grey[500] : Colors.grey[500],
+                                                      color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.7),
                                                     ),
                                                   ),
                                                 ],
@@ -628,12 +608,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                               trailing: Container(
                                                 padding: const EdgeInsets.all(4),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(0xFF7E57C2).withOpacity(0.1),
+                                                  color: AppColors.primary.toSurface(),
                                                   borderRadius: BorderRadius.circular(4),
                                                 ),
                                                 child: Icon(
                                                   Icons.arrow_forward_ios,
-                                                  color: const Color(0xFF7E57C2),
+                                                  color: AppColors.primary,
                                                   size: 12,
                                                 ),
                                               ),

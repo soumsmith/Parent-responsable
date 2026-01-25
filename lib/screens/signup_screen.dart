@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../services/auth_service.dart';
+import '../config/app_colors.dart';
 import 'otp_verification_screen.dart';
 
 /// Écran de création de compte avec formulaire téléphone
@@ -86,19 +87,41 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Création de compte'),
+        backgroundColor: AppColors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.getTextColor(isDark),
+          ),
+        ),
+        title: Text(
+          'Création de compte',
+          style: TextStyle(
+            color: AppColors.getTextColor(isDark),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-            ],
+            colors: isDark
+                ? [
+                    AppColors.backgroundDark,
+                    AppColors.surfaceDark,
+                  ]
+                : [
+                    AppColors.white,
+                    AppColors.primaryLight.withOpacity(0.05),
+                  ],
           ),
         ),
         child: SafeArea(
@@ -116,30 +139,33 @@ class _SignupScreenState extends State<SignupScreen> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppColors.primary.toSurface(),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.person_add,
                         size: 40,
-                        color: Colors.white,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
                   const SizedBox(height: 32),
                   Text(
                     'CRÉER UN COMPTE',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.getTextColor(isDark),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Entrez votre numéro de téléphone pour créer votre compte',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -147,10 +173,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
+                      color: AppColors.getSurfaceColor(isDark),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppColors.getBorderColor(isDark),
                         width: 1,
                       ),
                     ),
@@ -159,11 +185,38 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         TextFormField(
                           controller: _phoneController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Numéro de téléphone *',
                             hintText: '+225 XX XX XX XX',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.phone),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: AppColors.getBorderColor(isDark),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: AppColors.getBorderColor(isDark),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.phone,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                            ),
+                            labelStyle: TextStyle(
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                            ),
+                            hintStyle: TextStyle(
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: AppColors.getTextColor(isDark),
                           ),
                           keyboardType: TextInputType.phone,
                           validator: _validatePhone,
@@ -183,23 +236,24 @@ class _SignupScreenState extends State<SignupScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: AppColors.primary.toSurface(),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.blue,
+                        color: AppColors.primary.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.blue[700]),
+                        Icon(Icons.info_outline, color: AppColors.primary),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Un code de vérification sera envoyé par SMS à votre numéro de téléphone.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.blue[900],
-                                ),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                            ),
                           ),
                         ),
                       ],

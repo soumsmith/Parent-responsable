@@ -14,6 +14,7 @@ import '../services/remote_api_service.dart';
 import '../services/notification_service.dart';
 import '../services/theme_service.dart';
 import '../config/app_config.dart';
+import '../config/app_colors.dart';
 import '../widgets/custom_button.dart';
 
 /// Écran pour ajouter un élève par matricule
@@ -475,48 +476,31 @@ class _AddChildScreenState extends State<AddChildScreen>
   }
 
   Widget _buildSliverAppBar() {
-    final isDarkMode = _themeService.isDarkMode;
+    final theme = Theme.of(context);
     
     return SliverAppBar(
       expandedHeight: 20,
       floating: false,
       pinned: true,
-      backgroundColor: isDarkMode ? const Color(0xFF1A1A2E) : const Color(0xFF4F46E5),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         title: const Text(
           'Ajouter un élève',
           style: TextStyle(
-            color: Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
         ),
         titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      const Color(0xFF1A1A2E),
-                      const Color(0xFF2D2D44),
-                    ]
-                  : [
-                      const Color(0xFF4F46E5),
-                      const Color(0xFF7C3AED),
-                    ],
-            ),
-          ),
-        ),
       ),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+        icon: Icon(Icons.arrow_back_ios, color: theme.iconTheme.color),
         onPressed: () => Navigator.of(context).pop(),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.help_outline, color: Colors.white),
+          icon: Icon(Icons.help_outline, color: theme.iconTheme.color),
           onPressed: () {
             _showHelpDialog();
           },
@@ -526,20 +510,16 @@ class _AddChildScreenState extends State<AddChildScreen>
   }
 
   Widget _buildWelcomeSection() {
-    final isDarkMode = _themeService.isDarkMode;
-    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        gradient: AppColors.successGradient,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.15)
-                : Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 1),
+            color: AppColors.success.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -550,32 +530,30 @@ class _AddChildScreenState extends State<AddChildScreen>
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-              ),
+              color: Colors.white.withOpacity(0.9),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person_add,
               size: 30,
-              color: Colors.white,
+              color: AppColors.success,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'Ajouter votre enfant',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+              color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Retrouvez facilement votre enfant\nen entrant son matricule scolaire',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
-              color: isDarkMode ? Colors.grey[300] : const Color(0xFF6B7280),
+              color: Colors.white70,
               height: 1.3,
             ),
             textAlign: TextAlign.center,
@@ -591,23 +569,19 @@ class _AddChildScreenState extends State<AddChildScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        color: AppColors.getSurfaceColor(isDarkMode),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDarkMode 
-              ? const Color(0xFF4F46E5).withOpacity(0.3)
-              : const Color(0xFF4F46E5).withOpacity(0.1),
-          width: 2,
+          color: AppColors.primary.withOpacity(0.3),
+          width: 0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.15)
-                : Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.3),
+        //     blurRadius: 15,
+        //     offset: const Offset(0, 4),
+        //   ),
+        // ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -617,7 +591,7 @@ class _AddChildScreenState extends State<AddChildScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+              color: AppColors.getTextColor(isDarkMode),
             ),
           ),
           const SizedBox(height: 20),
@@ -660,7 +634,7 @@ class _AddChildScreenState extends State<AddChildScreen>
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isDarkMode ? const Color(0xFF4F46E5) : Colors.blue,
+                  AppColors.primary,
                 ),
               ),
             ),
@@ -694,6 +668,8 @@ class _AddChildScreenState extends State<AddChildScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Réessayer'),
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -752,11 +728,33 @@ class _AddChildScreenState extends State<AddChildScreen>
             hintText: 'Rechercher une école...',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: AppColors.getBorderColor(isDarkMode),
+              ),
             ),
-            prefixIcon: const Icon(Icons.school),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: AppColors.getBorderColor(isDarkMode),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: AppColors.primary,
+                width: 2,
+              ),
+            ),
+            prefixIcon: Icon(
+              Icons.school,
+              color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+            ),
             suffixIcon: _selectedEcoleId != null
                 ? IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: Icon(
+                      Icons.clear,
+                      color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+                    ),
                     onPressed: () {
                       fieldTextEditingController.clear();
                       setState(() {
@@ -767,7 +765,16 @@ class _AddChildScreenState extends State<AddChildScreen>
                       });
                     },
                   )
-                : const Icon(Icons.search),
+                : Icon(
+                    Icons.search,
+                    color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+                  ),
+            labelStyle: TextStyle(
+              color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+            ),
+            hintStyle: TextStyle(
+              color: AppColors.getTextColor(isDarkMode, type: TextType.secondary).withOpacity(0.6),
+            ),
           ),
           onChanged: (value) {
             if (_selectedEcoleId != null) {
@@ -810,7 +817,7 @@ class _AddChildScreenState extends State<AddChildScreen>
           child: Material(
             elevation: 4.0,
             borderRadius: BorderRadius.circular(12),
-            color: isDarkMode ? const Color(0xFF2D2D44) : Colors.white,
+            color: AppColors.getSurfaceColor(isDarkMode),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
               child: ListView.builder(
@@ -829,18 +836,18 @@ class _AddChildScreenState extends State<AddChildScreen>
                           Text(
                             option.ecoleclibelle,
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.getTextColor(isDarkMode),
                             ),
                           ),
-                          if (option.ecolecode.isNotEmpty) ...[
+                          if (option.ecolecode != option.ecoleclibelle) ...[
                             const SizedBox(height: 4),
                             Text(
-                              'Code: ${option.ecolecode}',
+                              option.ecolecode,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
                               ),
                             ),
                           ],
@@ -867,17 +874,42 @@ class _AddChildScreenState extends State<AddChildScreen>
         hintText: 'Ex: 24047355B',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.getBorderColor(isDarkMode),
+          ),
         ),
-        prefixIcon: const Icon(Icons.badge),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.getBorderColor(isDarkMode),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.primary,
+            width: 2,
+          ),
+        ),
+        prefixIcon: Icon(
+          Icons.badge,
+          color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+        ),
         helperText: 'Vous trouverez ce numéro sur les documents scolaires',
         helperStyle: TextStyle(
           fontSize: 12,
-          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+          color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+        ),
+        labelStyle: TextStyle(
+          color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
+        ),
+        hintStyle: TextStyle(
+          color: AppColors.getTextColor(isDarkMode, type: TextType.secondary).withOpacity(0.6),
         ),
       ),
       style: TextStyle(
         fontSize: 16,
-        color: isDarkMode ? Colors.white : Colors.black,
+        color: AppColors.getTextColor(isDarkMode),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -891,25 +923,31 @@ class _AddChildScreenState extends State<AddChildScreen>
   }
 
   Widget _buildErrorMessage() {
+    final isDarkMode = _themeService.isDarkMode;
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: AppColors.error.toSurface(),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.red.withOpacity(0.3),
+          color: AppColors.error.withOpacity(0.3),
         ),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red[700], size: 20),
+          Icon(
+            Icons.error_outline,
+            color: AppColors.error,
+            size: 20,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              _errorMessage ?? '',
+              _errorMessage!,
               style: TextStyle(
-                color: Colors.red[700],
                 fontSize: 14,
+                color: AppColors.error,
               ),
             ),
           ),
@@ -919,43 +957,43 @@ class _AddChildScreenState extends State<AddChildScreen>
   }
 
   Widget _buildFoundStudentCard() {
-    final isDarkMode = _themeService.isDarkMode;
+    final theme = Theme.of(context);
     final eleve = _foundEleve!;
     final ecole = _foundEcole!;
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.4)
-                : const Color(0xFF4F46E5).withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(15),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: isDarkMode 
+        //         ? AppColors.black.withOpacity(0.4)
+        //         : AppColors.primary.withOpacity(0.15),
+        //     blurRadius: 20,
+        //     offset: const Offset(0, 8),
+        //   ),
+        //   BoxShadow(
+        //     color: isDarkMode 
+        //         ? AppColors.black.withOpacity(0.2)
+        //         : AppColors.shadowLight,
+        //     blurRadius: 10,
+        //     offset: const Offset(0, 2),
+        //   ),
+        // ],
       ),
       child: Column(
         children: [
           // Header avec succès
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.green[400]!,
-                  Colors.green[600]!,
+                  Colors.green.shade50,
+                  Colors.green.shade100,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -971,13 +1009,13 @@ class _AddChildScreenState extends State<AddChildScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.green.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.check_rounded,
-                    color: Colors.white,
-                    size: 28,
+                    color: Colors.green,
+                    size: 18,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -986,7 +1024,7 @@ class _AddChildScreenState extends State<AddChildScreen>
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.green,
                   ),
                 ),
               ],
@@ -1005,25 +1043,11 @@ class _AddChildScreenState extends State<AddChildScreen>
                     Hero(
                       tag: 'student_photo_${eleve.matriculeEleve}',
                       child: Container(
-                        width: 90,
-                        height: 90,
+                        width: 50,
+                        height: 50,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF4F46E5),
-                              const Color(0xFF7C3AED),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDarkMode 
-                                  ? Colors.black.withOpacity(0.15)
-                                  : Colors.black.withOpacity(0.03),
-                              blurRadius: 6,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
+                          gradient: AppColors.primaryGradient,
                         ),
                         child: ClipOval(
                           child: eleve.urlPhoto != null && eleve.urlPhoto!.isNotEmpty
@@ -1032,11 +1056,11 @@ class _AddChildScreenState extends State<AddChildScreen>
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+                                      color: theme.dividerColor,
                                       child: Icon(
                                         Icons.person,
                                         size: 40,
-                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                        color: theme.iconTheme.color?.withOpacity(0.6),
                                       ),
                                     );
                                   },
@@ -1046,7 +1070,7 @@ class _AddChildScreenState extends State<AddChildScreen>
                                       child: CircularProgressIndicator(
                                         strokeWidth: 3,
                                         valueColor: AlwaysStoppedAnimation<Color>(
-                                          const Color(0xFF4F46E5),
+                                          theme.primaryColor,
                                         ),
                                       ),
                                     );
@@ -1061,20 +1085,29 @@ class _AddChildScreenState extends State<AddChildScreen>
                       ),
                     ),
                     
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 16),
                     
                     // Informations principales
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            eleve.fullName,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                eleve.nomEleve ?? 'Nom inconnu',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                eleve.prenomEleve ?? 'Prénom inconnu',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.textTheme.titleMedium?.color?.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1082,36 +1115,31 @@ class _AddChildScreenState extends State<AddChildScreen>
                   ],
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
                 // Informations détaillées compactes
                 _buildCompactInfoRow(Icons.school, 'École', ecole.ecoleclibelle),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCompactInfoRow(Icons.class_, 'Classe', eleve.classe),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCompactInfoRow(Icons.badge, 'Matricule', eleve.matriculeEleve),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
                 // Bouton d'action
                 Container(
                   width: double.infinity,
-                  height: 56,
+                  height: 50,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [
-                        Color(0xFF4F46E5),
-                        Color(0xFF7C3AED),
+                        Colors.green.shade400,
+                        Colors.green.shade700,
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF4F46E5).withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -1149,34 +1177,26 @@ class _AddChildScreenState extends State<AddChildScreen>
   }
 
   Widget _buildCompactInfoRow(IconData icon, String label, String value) {
-    final isDarkMode = _themeService.isDarkMode;
+    final theme = Theme.of(context);
     
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDarkMode 
-            ? const Color(0xFF2D2D44)
-            : const Color(0xFFF8FAFC),
+        color: theme.primaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDarkMode 
-              ? const Color(0xFF4F46E5).withOpacity(0.2)
-              : const Color(0xFF4F46E5).withOpacity(0.1),
-          width: 1,
-        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF4F46E5).withOpacity(0.1),
+              color: theme.primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
               icon, 
               size: 16, 
-              color: const Color(0xFF4F46E5),
+              color: theme.primaryColor,
             ),
           ),
           const SizedBox(width: 10),
@@ -1185,7 +1205,7 @@ class _AddChildScreenState extends State<AddChildScreen>
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+              color: theme.textTheme.bodySmall?.color,
             ),
           ),
           const SizedBox(width: 6),
@@ -1195,7 +1215,7 @@ class _AddChildScreenState extends State<AddChildScreen>
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+                color: theme.textTheme.bodyMedium?.color,
               ),
             ),
           ),

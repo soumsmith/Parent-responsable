@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/timetable_entry.dart';
 import '../services/api_service.dart';
-import '../app.dart';
+import '../widgets/main_screen_wrapper.dart';
 import '../widgets/custom_card.dart';
 
 /// Écran d'affichage de l'emploi du temps
@@ -33,7 +33,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
     });
 
     try {
-      final apiService = App.of(context).apiService;
+      final apiService = MainScreenWrapper.of(context).apiService;
       final timetable = await apiService.getTimetableForChild(widget.childId);
       
       setState(() {

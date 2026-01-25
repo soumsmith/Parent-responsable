@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
+import '../widgets/main_screen_wrapper.dart';
+import '../widgets/custom_search_bar.dart';
+import '../utils/image_helper.dart';
 
-class LibraryScreen extends StatefulWidget {
+class LibraryScreen extends StatefulWidget implements MainScreenChild {
   const LibraryScreen({super.key});
 
   @override
@@ -9,7 +13,8 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> {
   String _selectedFilter = 'Tous';
-  bool _isOnline = true;
+  bool _isSearching = false;
+  TextEditingController _searchController = TextEditingController();
 
   final List<String> _filters = ['Tous', 'Services', 'Livres', 'PDF', 'Vidéos'];
 
@@ -20,6 +25,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'Service',
       'icon': 'shopping_bag',
       'color': '0xFF6366F1',
+      'image': 'https://picsum.photos/seed/libouli/400/300.jpg',
     },
     {
       'title': 'POULS-PAID',
@@ -27,6 +33,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'Service',
       'icon': 'school',
       'color': '0xFF8B5CF6',
+      'image': 'https://picsum.photos/seed/pouls-paid/400/300.jpg',
     },
     {
       'title': 'Mathématiques',
@@ -34,6 +41,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'Livre',
       'icon': 'calculate',
       'color': '0xFF3B82F6',
+      'image': 'https://picsum.photos/seed/math-ce1/400/300.jpg',
     },
     {
       'title': 'Sciences',
@@ -41,6 +49,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'PDF',
       'icon': 'science',
       'color': '0xFF10B981',
+      'image': 'https://picsum.photos/seed/sciences-cm2/400/300.jpg',
     },
     {
       'title': 'Français',
@@ -48,6 +57,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'Livre',
       'icon': 'menu_book',
       'color': '0xFF8B5CF6',
+      'image': 'https://picsum.photos/seed/francais-grammar/400/300.jpg',
     },
     {
       'title': 'Histoire',
@@ -55,13 +65,28 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'type': 'Vidéo',
       'icon': 'history_edu',
       'color': '0xFFF59E0B',
+      'image': 'https://picsum.photos/seed/history/400/300.jpg',
     },
   ];
 
   List<Map<String, String>> get _filteredItems {
-    if (_selectedFilter == 'Tous') return _libraryItems;
-    if (_selectedFilter == 'Services') return _libraryItems.where((item) => item['type'] == 'Service').toList();
-    return _libraryItems.where((item) => item['type'] == _selectedFilter).toList();
+    var items = _libraryItems;
+    
+    // Apply filter
+    if (_selectedFilter != 'Tous') {
+      items = items.where((item) => item['type'] == _selectedFilter).toList();
+    }
+    
+    // Apply search
+    if (_searchController.text.isNotEmpty) {
+      final searchQuery = _searchController.text.toLowerCase();
+      items = items.where((item) => 
+        item['title']!.toLowerCase().contains(searchQuery) ||
+        item['subtitle']!.toLowerCase().contains(searchQuery)
+      ).toList();
+    }
+    
+    return items;
   }
 
   @override
@@ -84,36 +109,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         actions: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: _isOnline ? const Color(0xFF10B981) : const Color(0xFF6B7280),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.circle,
-                  size: 8,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 6),
-                const Text(
-                  'En ligne',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
           IconButton(
             icon: Icon(Icons.search, color: Theme.of(context).iconTheme.color),
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                }
+              });
+            },
           ),
           IconButton(
             icon: Icon(Icons.more_vert, color: Theme.of(context).iconTheme.color),
@@ -123,35 +128,74 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ),
       body: Column(
         children: [
+          // Search Bar with Slide Down Animation
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            height: _isSearching ? 56 : 0,
+            margin: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: _isSearching ? 8 : 0,
+            ),
+            child: _isSearching
+                ? CustomSearchBar(
+                    hintText: 'Rechercher un document...',
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                    onClear: () {
+                      setState(() {
+                        _isSearching = false;
+                        _searchController.clear();
+                      });
+                    },
+                    autoFocus: true,
+                  )
+                : null,
+          ),
+          
           // Filter Tabs
           Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            height: 35,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _filters.length,
               itemBuilder: (context, index) {
                 final filter = _filters[index];
                 final isSelected = filter == _selectedFilter;
+                final theme = Theme.of(context);
+                final isDark = theme.brightness == Brightness.dark;
+                
                 return GestureDetector(
                   onTap: () => setState(() => _selectedFilter = filter),
                   child: Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.only(right: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      border: isSelected 
-                        ? null 
-                        : Border.all(color: Theme.of(context).dividerColor),
+                      gradient: isSelected ? AppColors.primaryGradient : null,
+                      color: !isSelected ? AppColors.getSurfaceColor(isDark) : null,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: isSelected
+                          ? [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                          : [],
                     ),
                     child: Text(
                       filter,
                       style: TextStyle(
                         color: isSelected 
-                          ? Theme.of(context).colorScheme.onPrimary 
-                          : Theme.of(context).textTheme.bodyMedium?.color,
-                        fontSize: 14,
+                          ? Colors.white 
+                          : AppColors.getTextColor(isDark),
+                        fontSize: 12,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       ),
                     ),
@@ -161,11 +205,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
           ),
           
-          // Results Count and Status
+          // Results Count
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${_filteredItems.length} résultats',
@@ -174,36 +217,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      size: 8,
-                      color: _isOnline ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _isOnline ? 'En ligne' : 'Hors ligne',
-                      style: TextStyle(
-                        color: _isOnline 
-                          ? Theme.of(context).colorScheme.primary 
-                          : Theme.of(context).colorScheme.error,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    IconButton(
-                      icon: const Icon(Icons.refresh, size: 18),
-                      onPressed: () {
-                        setState(() {
-                          _isOnline = !_isOnline;
-                        });
-                      },
-                      color: Theme.of(context).iconTheme.color?.withOpacity(0.6),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -234,8 +247,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Widget _buildLibraryCard(Map<String, String> item) {
-    final IconData iconData = _getIconData(item['icon']!);
     final Color color = Color(int.parse(item['color']!));
+    final String? imageUrl = item['image'];
     
     return Container(
       decoration: BoxDecoration(
@@ -249,103 +262,88 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Icon
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                iconData,
-                color: color,
-                size: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cover Image
+          Expanded(
+            flex: 3,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: ImageHelper.buildNetworkImage(
+                imageUrl: imageUrl,
+                placeholder: item['title'] ?? 'Image',
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 12),
-            
-            // Title
-            Text(
-              item['title']!,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.titleMedium?.color,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+          ),
+          
+          // Content
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    item['title']!,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.titleMedium?.color,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  
+                  // Subtitle
+                  Text(
+                    item['subtitle']!,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Type Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      item['type']!,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
-            
-            // Subtitle
-            Text(
-              item['subtitle']!,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            
-            const Spacer(),
-            
-            // Type Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                item['type']!,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'shopping_bag':
-        return Icons.shopping_bag;
-      case 'school':
-        return Icons.school;
-      case 'calculate':
-        return Icons.calculate;
-      case 'science':
-        return Icons.science;
-      case 'menu_book':
-        return Icons.menu_book;
-      case 'history_edu':
-        return Icons.history_edu;
-      case 'public':
-        return Icons.public;
-      case 'language':
-        return Icons.language;
-      case 'picture_as_pdf':
-        return Icons.picture_as_pdf;
-      case 'play_circle':
-        return Icons.play_circle;
-      case 'headphones':
-        return Icons.headphones;
-      default:
-        return Icons.insert_drive_file;
-    }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
 

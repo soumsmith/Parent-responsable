@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../app.dart';
+import '../config/app_colors.dart';
 import 'signup_screen.dart';
 import 'otp_verification_screen.dart';
 
@@ -92,12 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
             end: Alignment.bottomCenter,
             colors: isDark
                 ? [
-                    const Color(0xFF1E1E1E),
-                    const Color(0xFF2C2C2C),
+                    AppColors.backgroundDark,
+                    AppColors.surfaceDark,
                   ]
                 : [
-                    Colors.white,
-                    const Color(0xFFF5F9FF),
+                    AppColors.white,
+                    AppColors.primaryLight.withOpacity(0.05),
                   ],
           ),
         ),
@@ -112,28 +113,37 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 40),
                   // Logo minimaliste
                   Center(
-                    child: Icon(
-                      Icons.school,
-                      size: 64,
-                      color: isDark ? Colors.white70 : const Color(0xFF1E3A5F),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.toSurface(),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Icon(
+                        Icons.school,
+                        size: 64,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   // Message d'accueil minimaliste
                   Text(
                     'Bienvenue !',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : const Color(0xFF1E3A5F),
-                        ),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.getTextColor(isDark),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Connectez-vous pour suivre le parcours scolaire de votre enfant',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isDark ? Colors.grey[400] : Colors.black54,
-                        ),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -141,13 +151,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+                      color: AppColors.getSurfaceColor(isDark),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
                           color: isDark
-                              ? Colors.black.withOpacity(0.15)
-                              : Colors.black.withOpacity(0.03),
+                              ? AppColors.black.withOpacity(0.15)
+                              : AppColors.shadowLight,
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -158,10 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           'Connexion',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white : const Color(0xFF1E3A5F),
-                              ),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.getTextColor(isDark),
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 20),
@@ -173,34 +184,34 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: '+225 XX XX XX XX',
                             border: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: isDark ? Colors.white24 : Colors.black12,
+                                color: AppColors.getBorderColor(isDark),
                               ),
                             ),
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: isDark ? Colors.white24 : Colors.black12,
+                                color: AppColors.getBorderColor(isDark),
                               ),
                             ),
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: const Color(0xFF2196F3),
+                                color: AppColors.primary,
                                 width: 2,
                               ),
                             ),
                             prefixIcon: Icon(
                               Icons.phone,
-                              color: isDark ? Colors.white54 : Colors.black54,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
                             ),
                             labelStyle: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.black54,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
                             ),
                             hintStyle: TextStyle(
-                              color: isDark ? Colors.white38 : Colors.black38,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
                             ),
                           ),
                           keyboardType: TextInputType.phone,
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
+                            color: AppColors.getTextColor(isDark),
                             fontSize: 16,
                           ),
                           validator: (value) {
@@ -230,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               'Créer un compte',
                               style: TextStyle(
-                                color: const Color(0xFF2196F3),
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -244,8 +255,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2196F3),
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
                               elevation: 2,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -257,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                                     ),
                                   )
                                 : const Text('Connexion'),
@@ -271,9 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark 
-                          ? const Color(0xFF2C2C2C).withOpacity(0.5)
-                          : const Color(0xFFE3F2FD).withOpacity(0.5),
+                      color: AppColors.primary.toSurface(),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -281,15 +290,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         Icon(
                           Icons.info_outline,
                           size: 16,
-                          color: isDark ? Colors.white54 : Colors.black54,
+                          color: AppColors.primary,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Après la première connexion, vos informations seront sauvegardées.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isDark ? Colors.white60 : Colors.black54,
-                                ),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                            ),
                           ),
                         ),
                       ],
