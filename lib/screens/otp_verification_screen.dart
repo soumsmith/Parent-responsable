@@ -309,7 +309,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         decoration: InputDecoration(
                           counterText: '',
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12),
                         ),
                         onChanged: (value) => _handleOtpChange(index, value),
                       ),

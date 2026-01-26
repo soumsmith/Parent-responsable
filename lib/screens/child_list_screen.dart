@@ -310,7 +310,7 @@ class _ChildListScreenState extends State<ChildListScreen>
               floating: false,
               delegate: _CustomTabBarDelegate(
                 Container(
-                  color: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+                  color: isDarkMode ? AppColors.pureBlack : AppColors.getSurfaceColor(isDarkMode),
                   child: _buildModernTabBar(),
                 ),
               ),
@@ -318,18 +318,25 @@ class _ChildListScreenState extends State<ChildListScreen>
           ];
         },
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
-                controller: _tabController,
-                children: [
-                  NotesScreen(childId: widget.child.id),
-                  TimetableScreen(childId: widget.child.id),
-                  _buildHomeworkTab(),
-                  _buildAbsencesTab(),
-                  _buildSanctionsTab(),
-                  MessagesScreen(),
-                  FeesScreen(childId: widget.child.id),
-                ],
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                ),
+              )
+            : Container(
+                color: isDarkMode ? AppColors.pureBlack : AppColors.getSurfaceColor(isDarkMode),
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    NotesScreen(childId: widget.child.id),
+                    TimetableScreen(childId: widget.child.id),
+                    _buildHomeworkTab(),
+                    _buildAbsencesTab(),
+                    _buildSanctionsTab(),
+                    MessagesScreen(),
+                    FeesScreen(childId: widget.child.id),
+                  ],
+                ),
               ),
       ),
     );

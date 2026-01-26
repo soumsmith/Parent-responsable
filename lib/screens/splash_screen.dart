@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'intro_screen.dart';
 import '../services/auth_service.dart';
 import '../app.dart';
 
@@ -29,9 +30,9 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(builder: (_) => const App()),
         );
       } else {
-        // Aller à l'écran de connexion
+        // Aller à l'écran d'introduction
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const IntroScreen()),
         );
       }
     }

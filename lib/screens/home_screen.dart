@@ -46,39 +46,45 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       // Rafraîchir l'utilisateur actuel (utile après reconnexion)
       MainScreenWrapper.of(context).refreshCurrentUser();
-      
+
       final parentId = MainScreenWrapper.of(context).currentUserId ?? 'parent1';
-      
+
       // Charger depuis l'API (qui charge maintenant depuis la base de données locale)
       final apiService = MainScreenWrapper.of(context).apiService;
       final children = await apiService.getChildrenForParent(parentId);
-      
+
       // Mettre à jour les photos manquantes pour les enfants existants
       final poulsApiService = PoulsScolaireApiService();
       for (final child in children) {
-        if ((child.photoUrl == null || child.photoUrl!.isEmpty) && child.id.isNotEmpty) {
+        if ((child.photoUrl == null || child.photoUrl!.isEmpty) &&
+            child.id.isNotEmpty) {
           try {
             // Récupérer les informations de l'enfant depuis la base de données
-            final childInfo = await DatabaseService.instance.getChildInfoById(child.id);
+            final childInfo =
+                await DatabaseService.instance.getChildInfoById(child.id);
             if (childInfo != null) {
               final ecoleId = childInfo['ecoleId'] as int?;
               final matricule = childInfo['matricule'] as String?;
-              
+
               if (ecoleId != null && matricule != null) {
                 // Récupérer l'année scolaire ouverte pour cette école
-                final anneeScolaire = await poulsApiService.getAnneeScolaireOuverte(ecoleId);
+                final anneeScolaire =
+                    await poulsApiService.getAnneeScolaireOuverte(ecoleId);
                 final anneeId = anneeScolaire.anneeOuverteCentraleId;
-                
+
                 // Rechercher l'élève dans l'API pour récupérer cheminphoto
                 final eleve = await poulsApiService.findEleveByMatricule(
                   ecoleId,
                   anneeId,
                   matricule,
                 );
-                
-                if (eleve != null && eleve.urlPhoto != null && eleve.urlPhoto!.isNotEmpty) {
+
+                if (eleve != null &&
+                    eleve.urlPhoto != null &&
+                    eleve.urlPhoto!.isNotEmpty) {
                   // Mettre à jour la photo dans la base de données
-                  await DatabaseService.instance.updateChildPhoto(child.id, eleve.urlPhoto);
+                  await DatabaseService.instance
+                      .updateChildPhoto(child.id, eleve.urlPhoto);
                   // Mettre à jour l'objet child en mémoire
                   final updatedChild = Child(
                     id: child.id,
@@ -93,16 +99,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (index >= 0) {
                     children[index] = updatedChild;
                   }
-                  print('✅ Photo mise à jour pour ${child.fullName}: ${eleve.urlPhoto}');
+                  print(
+                      '✅ Photo mise à jour pour ${child.fullName}: ${eleve.urlPhoto}');
                 }
               }
             }
           } catch (e) {
-            print('⚠️ Erreur lors de la mise à jour de la photo pour ${child.fullName}: $e');
+            print(
+                '⚠️ Erreur lors de la mise à jour de la photo pour ${child.fullName}: $e');
           }
         }
       }
-      
+
       setState(() {
         _children = children;
         _isLoading = false;
@@ -118,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: AppColors.getPureBackground(isDark),
       extendBodyBehindAppBar: true,
@@ -169,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: FloatingActionButton.extended(
+        child: FloatingActionButton(
           onPressed: () async {
             final result = await Navigator.of(context).push(
               MaterialPageRoute(
@@ -180,17 +188,12 @@ class _HomeScreenState extends State<HomeScreen> {
               _loadChildren();
             }
           },
-          backgroundColor: AppColors.transparent,
-          elevation: 0,
-          icon: const Icon(Icons.add, size: 20),
-          label: Text(
-            'Ajouter',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              color: AppColors.white,
-            ),
+          backgroundColor: AppColors.primary,
+          elevation: 8,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 24,
           ),
         ),
       ),
@@ -202,19 +205,17 @@ class _HomeScreenState extends State<HomeScreen> {
             end: Alignment.bottomCenter,
             colors: isDark
                 ? [
-              AppColors.primary.withOpacity(0),
-              AppColors.primary.withOpacity(0),
-              AppColors.primary.withOpacity(0.3),
-              AppColors.getPureAppBarBackground(true),
-
-            ]
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0.3),
+                    AppColors.getPureAppBarBackground(true),
+                  ]
                 : [
-              AppColors.primary.withOpacity(0),
-              AppColors.primary.withOpacity(0),
-              AppColors.primary.withOpacity(0.3),
-              AppColors.getPureAppBarBackground(false),
-
-            ],
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0),
+                    AppColors.primary.withOpacity(0.3),
+                    AppColors.getPureAppBarBackground(false),
+                  ],
           ),
         ),
         child: SafeArea(
@@ -273,26 +274,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
-                                        Icons.person,
+                                        Icons.child_care,
                                         color: Colors.white,
                                         size: 16,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'My nutritionist',
+                                      '${_children.length}',
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
                                         color: AppColors.getTextColor(isDark),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Get personalized advice',
+                                      'Enfant${_children.length > 1 ? 's' : ''} inscrit${_children.length > 1 ? 's' : ''}',
                                       style: TextStyle(
                                         fontSize: 9,
-                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                        color: AppColors.getTextColor(isDark,
+                                            type: TextType.secondary),
                                       ),
                                     ),
                                   ],
@@ -321,26 +323,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
-                                        Icons.restaurant_menu,
+                                        Icons.school,
                                         color: Colors.white,
                                         size: 16,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'My recipes',
+                                      _getUniqueClassesCount().toString(),
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
                                         color: AppColors.getTextColor(isDark),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Healthy meal ideas',
+                                      'Classe${_getUniqueClassesCount() > 1 ? 's' : ''} différente${_getUniqueClassesCount() > 1 ? 's' : ''}',
                                       style: TextStyle(
                                         fontSize: 9,
-                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                        color: AppColors.getTextColor(isDark,
+                                            type: TextType.secondary),
                                       ),
                                     ),
                                   ],
@@ -373,26 +376,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
-                                        Icons.article,
+                                        Icons.apartment,
                                         color: Colors.white,
                                         size: 16,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'My articles',
+                                      _getUniqueSchoolsCount().toString(),
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
                                         color: AppColors.getTextColor(isDark),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Latest parenting tips',
+                                      'Établissement${_getUniqueSchoolsCount() > 1 ? 's' : ''}',
                                       style: TextStyle(
                                         fontSize: 9,
-                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                        color: AppColors.getTextColor(isDark,
+                                            type: TextType.secondary),
                                       ),
                                     ),
                                   ],
@@ -421,26 +425,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Icon(
-                                        Icons.school,
+                                        Icons.grade,
                                         color: Colors.white,
                                         size: 16,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'My classes',
+                                      _getAverageGradeDisplay(),
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
                                         color: AppColors.getTextColor(isDark),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Track progress',
+                                      'Niveau moyen',
                                       style: TextStyle(
                                         fontSize: 9,
-                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                        color: AppColors.getTextColor(isDark,
+                                            type: TextType.secondary),
                                       ),
                                     ),
                                   ],
@@ -482,7 +487,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const Spacer(),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.toSurface(),
                                 borderRadius: BorderRadius.circular(20),
@@ -506,7 +512,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             : _error != null
                                 ? Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.error_outline,
@@ -519,14 +526,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
-                                            color: AppColors.getTextColor(isDark),
+                                            color:
+                                                AppColors.getTextColor(isDark),
                                           ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
                                           _error!,
                                           style: TextStyle(
-                                            color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                            color: AppColors.getTextColor(
+                                                isDark,
+                                                type: TextType.secondary),
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -534,14 +544,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Container(
                                           decoration: BoxDecoration(
                                             gradient: AppColors.primaryGradient,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
                                           child: ElevatedButton(
                                             onPressed: _loadChildren,
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
+                                              backgroundColor:
+                                                  Colors.transparent,
                                               shadowColor: Colors.transparent,
-                                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12),
                                             ),
                                             child: const Text(
                                               'Réessayer',
@@ -558,9 +573,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : _children.isEmpty
                                     ? SingleChildScrollView(
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 24),
                                           child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Container(
                                                 width: 60,
@@ -568,11 +585,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                     colors: [
-                                                      AppColors.primaryLight.withOpacity(0.15),
-                                                      AppColors.primary.withOpacity(0.08),
+                                                      AppColors.primaryLight
+                                                          .withOpacity(0.15),
+                                                      AppColors.primary
+                                                          .withOpacity(0.08),
                                                     ],
                                                   ),
-                                                  borderRadius: BorderRadius.circular(30),
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
                                                 ),
                                                 child: Icon(
                                                   Icons.child_care,
@@ -586,7 +606,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w700,
-                                                  color: AppColors.getTextColor(isDark),
+                                                  color: AppColors.getTextColor(
+                                                      isDark),
                                                 ),
                                               ),
                                               const SizedBox(height: 12),
@@ -594,77 +615,111 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 'Ajoutez votre premier enfant\npour suivre son évolution',
                                                 style: TextStyle(
                                                   fontSize: 13,
-                                                  color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                                  color: AppColors.getTextColor(
+                                                      isDark,
+                                                      type: TextType.secondary),
                                                   height: 1.3,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
                                               const SizedBox(height: 28),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  gradient: AppColors.primaryGradient,
-                                                  borderRadius: BorderRadius.circular(10),
-                                                ),
-                                                child: ElevatedButton.icon(
-                                                  onPressed: () async {
-                                                    final result = await Navigator.of(context).push(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => const AddChildScreen(),
-                                                      ),
-                                                    );
-                                                    if (result == true) {
-                                                      _loadChildren();
-                                                    }
-                                                  },
-                                                  icon: const Icon(Icons.add, size: 16),
-                                                  label: const Text('Ajouter'),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.transparent,
-                                                    shadowColor: Colors.transparent,
-                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                  ),
-                                                ),
-                                              ),
+                                              // Container(
+                                              //   decoration: BoxDecoration(
+                                              //     gradient:
+                                              //         AppColors.primaryGradient,
+                                              //     borderRadius:
+                                              //         BorderRadius.circular(10),
+                                              //   ),
+                                              //   child: ElevatedButton.icon(
+                                              //     onPressed: () async {
+                                              //       final result =
+                                              //           await Navigator.of(
+                                              //                   context)
+                                              //               .push(
+                                              //         MaterialPageRoute(
+                                              //           builder: (_) =>
+                                              //               const AddChildScreen(),
+                                              //         ),
+                                              //       );
+                                              //       if (result == true) {
+                                              //         _loadChildren();
+                                              //       }
+                                              //     },
+                                              //     icon: const Icon(Icons.add,
+                                              //         size: 16),
+                                              //     label: const Text('Ajouter'),
+                                              //     style:
+                                              //         ElevatedButton.styleFrom(
+                                              //       backgroundColor:
+                                              //           Colors.transparent,
+                                              //       shadowColor:
+                                              //           Colors.transparent,
+                                              //       padding: const EdgeInsets
+                                              //           .symmetric(
+                                              //           horizontal: 16,
+                                              //           vertical: 10),
+                                              //     ),
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                         ),
                                       )
                                     : ListView.builder(
-                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            16, 0, 16, 100),
                                         itemCount: _children.length,
                                         itemBuilder: (context, index) {
                                           final child = _children[index];
                                           return Container(
-                                            margin: const EdgeInsets.only(bottom: 20),
+                                            margin: const EdgeInsets.only(
+                                                bottom: 20),
                                             decoration: BoxDecoration(
-                                              color: AppColors.getPureBackground(isDark),
-                                              borderRadius: BorderRadius.circular(16),
+                                              color:
+                                                  AppColors.getPureBackground(
+                                                      isDark),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                               border: Border.all(
                                                 color: isDark
-                                                    ? AppColors.grey700.withOpacity(0.3)
-                                                    : AppColors.grey200.withOpacity(0.5),
+                                                    ? AppColors.grey700
+                                                        .withOpacity(0.3)
+                                                    : AppColors.grey200
+                                                        .withOpacity(0.5),
                                                 width: 1,
                                               ),
                                             ),
                                             child: ListTile(
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 5),
                                               leading: Container(
                                                 width: 42,
                                                 height: 42,
                                                 decoration: BoxDecoration(
-                                                  gradient: AppColors.primaryGradient,
-                                                  borderRadius: BorderRadius.circular(10),
+                                                  gradient:
+                                                      AppColors.primaryGradient,
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
                                                 ),
-                                                child: child.photoUrl != null && child.photoUrl!.isNotEmpty
+                                                child: child.photoUrl != null &&
+                                                        child.photoUrl!
+                                                            .isNotEmpty
                                                     ? ClipRRect(
-                                                        borderRadius: BorderRadius.circular(10),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
                                                         child: Image.network(
                                                           child.photoUrl!,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder: (context, error, stackTrace) {
+                                                          errorBuilder:
+                                                              (context, error,
+                                                                  stackTrace) {
                                                             return Icon(
                                                               Icons.person,
-                                                              color: Colors.white,
+                                                              color:
+                                                                  Colors.white,
                                                               size: 20,
                                                             );
                                                           },
@@ -681,35 +736,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w700,
-                                                  color: AppColors.getTextColor(isDark),
+                                                  color: AppColors.getTextColor(
+                                                      isDark),
                                                 ),
                                               ),
                                               subtitle: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   const SizedBox(height: 2),
                                                   Text(
-                                                    child.establishment.isNotEmpty ? child.establishment : 'Établissement non renseigné',
+                                                    child.establishment
+                                                            .isNotEmpty
+                                                        ? child.establishment
+                                                        : 'Établissement non renseigné',
                                                     style: TextStyle(
                                                       fontSize: 11,
-                                                      color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                                                      fontWeight: FontWeight.w500,
+                                                      color: AppColors
+                                                          .getTextColor(isDark,
+                                                              type: TextType
+                                                                  .secondary),
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                   ),
                                                   Text(
-                                                    child.grade.isNotEmpty ? child.grade : 'Classe non renseignée',
+                                                    child.grade.isNotEmpty
+                                                        ? child.grade
+                                                        : 'Classe non renseignée',
                                                     style: TextStyle(
                                                       fontSize: 10,
-                                                      color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.7),
+                                                      color: AppColors
+                                                              .getTextColor(
+                                                                  isDark,
+                                                                  type: TextType
+                                                                      .secondary)
+                                                          .withOpacity(0.7),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                               trailing: Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding:
+                                                    const EdgeInsets.all(4),
                                                 decoration: BoxDecoration(
-                                                  color: AppColors.primary.toSurface(),
-                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: AppColors.primary
+                                                      .toSurface(),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
                                                 ),
                                                 child: Icon(
                                                   Icons.arrow_forward_ios,
@@ -720,7 +794,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                               onTap: () {
                                                 Navigator.of(context).push(
                                                   MaterialPageRoute(
-                                                    builder: (_) => ChildListScreen(child: child),
+                                                    builder: (_) =>
+                                                        ChildListScreen(
+                                                            child: child),
                                                   ),
                                                 );
                                               },
@@ -739,5 +815,52 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
+  // Méthodes utilitaires pour les statistiques
+  int _getUniqueClassesCount() {
+    final uniqueClasses = _children.map((child) => child.grade).toSet();
+    return uniqueClasses.length;
+  }
+
+  int _getUniqueSchoolsCount() {
+    final uniqueSchools = _children.map((child) => child.establishment).toSet();
+    return uniqueSchools.length;
+  }
+
+  String _getAverageGradeDisplay() {
+    if (_children.isEmpty) return '-';
+
+    // Extraire les niveaux numériques des classes (ex: "6ème", "5ème", "4ème", etc.)
+    final gradeLevels = _children.map((child) {
+      final grade = child.grade.toLowerCase();
+      if (grade.contains('cp') || grade.contains('1ère')) return 1;
+      if (grade.contains('ce1') || grade.contains('2ème')) return 2;
+      if (grade.contains('ce2') || grade.contains('3ème')) return 3;
+      if (grade.contains('cm1') || grade.contains('4ème')) return 4;
+      if (grade.contains('cm2') || grade.contains('5ème')) return 5;
+      if (grade.contains('6ème')) return 6;
+      if (grade.contains('5ème')) return 5;
+      if (grade.contains('4ème')) return 4;
+      if (grade.contains('3ème')) return 3;
+      if (grade.contains('seconde')) return 10;
+      if (grade.contains('première')) return 11;
+      if (grade.contains('terminale')) return 12;
+      return 3; // Valeur par défaut
+    }).toList();
+
+    if (gradeLevels.isEmpty) return '-';
+
+    final average = gradeLevels.reduce((a, b) => a + b) / gradeLevels.length;
+
+    // Convertir le niveau moyen en affichage textuel
+    if (average <= 1) return 'CP';
+    if (average <= 2) return 'CE1';
+    if (average <= 3) return 'CE2';
+    if (average <= 4) return 'CM1';
+    if (average <= 5) return 'CM2';
+    if (average <= 6) return '6ème';
+    if (average <= 10) return 'Collège';
+    if (average <= 11) return 'Première';
+    return 'Lycée';
+  }
+}
