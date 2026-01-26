@@ -716,6 +716,8 @@ class _NotesScreenState extends State<NotesScreen> {
               _buildNotesTable(),
               const SizedBox(height: 16),
             ] else if (_allSubjectAverages.isEmpty && !_isLoadingNotes) ...[
+              _buildFiltersSection(),
+              const SizedBox(height: 16),
               Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -785,6 +787,222 @@ class _NotesScreenState extends State<NotesScreen> {
       );
   }
 
+  Widget _buildFiltersSection() {
+    final isDarkMode = _themeService.isDarkMode;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.getSurfaceColor(isDarkMode),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? AppColors.black.withOpacity(0.3)
+                : AppColors.shadowLight,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.tune, color: Color(0xFF4F46E5), size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Filtres',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Affichage de l'année
+          Container(
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+            ),
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Année scolaire',
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                isDense: true,
+                labelStyle: TextStyle(
+                  color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                  fontSize: 14,
+                ),
+              ),
+              readOnly: true,
+              controller: TextEditingController(
+                text: _selectedYear ?? 'Chargement...',
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Flexible(
+                flex: 2,
+                child: _isLoading || _matieres.isEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: 'MATIÈRE',
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            isDense: true,
+                            labelStyle: TextStyle(
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                              fontSize: 14,
+                            ),
+                          ),
+                          readOnly: true,
+                          controller: TextEditingController(text: 'Chargement...'),
+                        ),
+                      )
+                    : Autocomplete<String>(
+                        key: ValueKey('matiere_autocomplete_${_matieres.length}_${_selectedSubject}'),
+                        initialValue: TextEditingValue(
+                          text: _selectedSubject ?? 'Toutes',
+                        ),
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text.isEmpty) {
+                            return ['Toutes', ..._matieres.map((m) => m.libelle)];
+                          }
+                          final query = textEditingValue.text.toLowerCase();
+                          final filtered = _matieres.where((m) => 
+                            m.libelle.toLowerCase().contains(query)
+                          ).map((m) => m.libelle).toList();
+                          return ['Toutes', ...filtered];
+                        },
+                        displayStringForOption: (String option) => option,
+                        fieldViewBuilder: (
+                          BuildContext context,
+                          TextEditingController fieldTextEditingController,
+                          FocusNode fieldFocusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextFormField(
+                            controller: fieldTextEditingController,
+                            focusNode: fieldFocusNode,
+                            decoration: InputDecoration(
+                              labelText: 'MATIÈRE',
+                              border: InputBorder.none,
+                              prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              isDense: true,
+                              labelStyle: TextStyle(
+                                color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                fontSize: 14,
+                              ),
+                            ),
+                            onFieldSubmitted: (String value) {
+                              onFieldSubmitted();
+                            },
+                          );
+                        },
+                        onSelected: (String selection) {
+                          print('🔄 Matière sélectionnée: $selection');
+                          _onSubjectChanged(selection);
+                        },
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                flex: 2,
+                child: _isLoading || _trimesters.isEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: 'Trimestre',
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            isDense: true,
+                            labelStyle: TextStyle(
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                              fontSize: 14,
+                            ),
+                          ),
+                          readOnly: true,
+                          controller: TextEditingController(
+                            text: _trimesters.isEmpty ? 'Aucun trimestre disponible' : 'Chargement...',
+                          ),
+                        ),
+                      )
+                    : Autocomplete<String>(
+                        key: ValueKey('trimestre_autocomplete_${_trimestersList.length}_${_selectedTrimester}'),
+                        initialValue: TextEditingValue(
+                          text: _selectedTrimester ?? 'Tous',
+                        ),
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text.isEmpty) {
+                            return _trimesters;
+                          }
+                          final query = textEditingValue.text.toLowerCase();
+                          return _trimesters.where((t) => 
+                            t.toLowerCase().contains(query)
+                          ).toList();
+                        },
+                        displayStringForOption: (String option) => option,
+                        fieldViewBuilder: (
+                          BuildContext context,
+                          TextEditingController fieldTextEditingController,
+                          FocusNode fieldFocusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextFormField(
+                            controller: fieldTextEditingController,
+                            focusNode: fieldFocusNode,
+                            decoration: InputDecoration(
+                              labelText: 'Trimestre',
+                              border: InputBorder.none,
+                              prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              isDense: true,
+                              labelStyle: TextStyle(
+                                color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
+                                fontSize: 14,
+                              ),
+                            ),
+                            onFieldSubmitted: (String value) {
+                              onFieldSubmitted();
+                            },
+                          );
+                        },
+                        onSelected: (String selection) {
+                          _onTrimesterChanged(selection);
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNotesTable() {
     final isDarkMode = _themeService.isDarkMode;
     
@@ -849,217 +1067,7 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           
           // Section des filtres intégrée
-          Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.getSurfaceColor(isDarkMode),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode 
-                      ? AppColors.black.withOpacity(0.3)
-                      : AppColors.shadowLight,
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.tune, color: Color(0xFF4F46E5), size: 20),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Filtres',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Affichage de l'année
-                Container(
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
-                  ),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Année scolaire',
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      isDense: true,
-                      labelStyle: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
-                        fontSize: 14,
-                      ),
-                    ),
-                    readOnly: true,
-                    controller: TextEditingController(
-                      text: _selectedYear ?? 'Chargement...',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: _isLoading || _matieres.isEmpty
-                          ? Container(
-                              decoration: BoxDecoration(
-                                color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
-                              ),
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'MATIÈRE',
-                                  border: InputBorder.none,
-                                  prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                  isDense: true,
-                                  labelStyle: TextStyle(
-                                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                readOnly: true,
-                                controller: TextEditingController(text: 'Chargement...'),
-                              ),
-                            )
-                          : Autocomplete<String>(
-                              key: ValueKey('matiere_autocomplete_${_matieres.length}_${_selectedSubject}'),
-                              initialValue: TextEditingValue(
-                                text: _selectedSubject ?? 'Toutes',
-                              ),
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return ['Toutes', ..._matieres.map((m) => m.libelle)];
-                                }
-                                final query = textEditingValue.text.toLowerCase();
-                                final filtered = _matieres.where((m) => 
-                                  m.libelle.toLowerCase().contains(query)
-                                ).map((m) => m.libelle).toList();
-                                return ['Toutes', ...filtered];
-                              },
-                              displayStringForOption: (String option) => option,
-                              fieldViewBuilder: (
-                                BuildContext context,
-                                TextEditingController fieldTextEditingController,
-                                FocusNode fieldFocusNode,
-                                VoidCallback onFieldSubmitted,
-                              ) {
-                                return TextFormField(
-                                  controller: fieldTextEditingController,
-                                  focusNode: fieldFocusNode,
-                                  decoration: InputDecoration(
-                                    labelText: 'MATIÈRE',
-                                    border: InputBorder.none,
-                                    prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                    isDense: true,
-                                    labelStyle: TextStyle(
-                                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  onFieldSubmitted: (String value) {
-                                    onFieldSubmitted();
-                                  },
-                                );
-                              },
-                              onSelected: (String selection) {
-                                print('🔄 Matière sélectionnée: $selection');
-                                _onSubjectChanged(selection);
-                              },
-                            ),
-                    ),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      flex: 2,
-                      child: _isLoading || _trimesters.isEmpty
-                          ? Container(
-                              decoration: BoxDecoration(
-                                color: isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF9FAFB),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isDarkMode ? const Color(0xFF424242) : const Color(0xFFE5E7EB)),
-                              ),
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Trimestre',
-                                  border: InputBorder.none,
-                                  prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                  isDense: true,
-                                  labelStyle: TextStyle(
-                                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                readOnly: true,
-                                controller: TextEditingController(
-                                  text: _trimesters.isEmpty ? 'Aucun trimestre disponible' : 'Chargement...',
-                                ),
-                              ),
-                            )
-                          : Autocomplete<String>(
-                              key: ValueKey('trimestre_autocomplete_${_trimestersList.length}_${_selectedTrimester}'),
-                              initialValue: TextEditingValue(
-                                text: _selectedTrimester ?? 'Tous',
-                              ),
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return _trimesters;
-                                }
-                                final query = textEditingValue.text.toLowerCase();
-                                return _trimesters.where((t) => 
-                                  t.toLowerCase().contains(query)
-                                ).toList();
-                              },
-                              displayStringForOption: (String option) => option,
-                              fieldViewBuilder: (
-                                BuildContext context,
-                                TextEditingController fieldTextEditingController,
-                                FocusNode fieldFocusNode,
-                                VoidCallback onFieldSubmitted,
-                              ) {
-                                return TextFormField(
-                                  controller: fieldTextEditingController,
-                                  focusNode: fieldFocusNode,
-                                  decoration: InputDecoration(
-                                    labelText: 'Trimestre',
-                                    border: InputBorder.none,
-                                    prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280)),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                    isDense: true,
-                                    labelStyle: TextStyle(
-                                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF6B7280),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  onFieldSubmitted: (String value) {
-                                    onFieldSubmitted();
-                                  },
-                                );
-                              },
-                              onSelected: (String selection) {
-                                _onTrimesterChanged(selection);
-                              },
-                            ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          _buildFiltersSection(),
           
           // En-tête moderne
           Container(

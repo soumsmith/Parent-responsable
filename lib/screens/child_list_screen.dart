@@ -373,16 +373,16 @@ class _ChildListScreenState extends State<ChildListScreen>
 
   Widget _buildProfileHeader() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: AppColors.warningGradient,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.warning.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
+            color: AppColors.warning.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -391,8 +391,8 @@ class _ChildListScreenState extends State<ChildListScreen>
           Row(
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: AppColors.primaryGradient,
@@ -409,7 +409,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                       )
                     : _buildDefaultAvatar(),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,25 +417,27 @@ class _ChildListScreenState extends State<ChildListScreen>
                     Text(
                       widget.child.fullName,
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       widget.child.grade,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 13,
                         color: Colors.white70,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       widget.child.establishment,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 11,
                         color: Colors.white60,
                       ),
                     ),
@@ -444,13 +446,13 @@ class _ChildListScreenState extends State<ChildListScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Row(
             children: [
               _buildStatusBadge('⭐ Excellent', AppColors.success),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _buildStatusBadge('✔ Assidu', AppColors.primary),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _buildStatusBadge('📈 Progression', AppColors.secondary),
             ],
           ),
@@ -462,30 +464,30 @@ class _ChildListScreenState extends State<ChildListScreen>
   Widget _buildDefaultAvatar() {
     return const Icon(
       Icons.person,
-      size: 40,
+      size: 30,
       color: Colors.white,
     );
   }
 
   Widget _buildStatusBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
           color: Color(0xFF333333),
         ),
@@ -554,17 +556,17 @@ class _ChildListScreenState extends State<ChildListScreen>
     final isDarkMode = _themeService.isDarkMode;
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.getSurfaceColor(isDarkMode),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: isDarkMode 
-                ? AppColors.black.withOpacity(0.3)
+                ? AppColors.black.withOpacity(0.2)
                 : AppColors.shadowLight,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -573,21 +575,21 @@ class _ChildListScreenState extends State<ChildListScreen>
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 16),
               const Spacer(),
               if (isLoading)
                 SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: 12,
+                  height: 12,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2,
+                    strokeWidth: 1.5,
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                   ),
                 )
               else
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: 6,
+                  height: 6,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
@@ -595,15 +597,15 @@ class _ChildListScreenState extends State<ChildListScreen>
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           if (isLoading)
             SizedBox(
-              height: 28,
+              height: 20,
               child: Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 4,
+                    width: 30,
+                    height: 3,
                     decoration: BoxDecoration(
                       color: AppColors.getTextColor(isDarkMode, type: TextType.secondary).withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
@@ -616,16 +618,16 @@ class _ChildListScreenState extends State<ChildListScreen>
             Text(
               value,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             title,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 11,
               color: AppColors.getTextColor(isDarkMode, type: TextType.secondary),
               fontWeight: FontWeight.w500,
             ),

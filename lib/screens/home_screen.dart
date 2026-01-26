@@ -127,8 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
           'Pouls École',
           style: TextStyle(
             color: AppColors.getTextColor(isDark),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
           ),
         ),
         automaticallyImplyLeading: false,
@@ -220,165 +220,241 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
               // Header hero section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Bonjour ! 👋',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w300,
-                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    // Text(
+                    //   'Bonjour ! 👋',
+                    //   style: TextStyle(
+                    //     fontSize: 28,
+                    //     fontWeight: FontWeight.w300,
+                    //     color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                    //     height: 1.2,
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 32),
                     Text(
                       'Suivez le parcours scolaire\nde vos enfants',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 19,
                         fontWeight: FontWeight.w700,
                         color: AppColors.getTextColor(isDark),
                         height: 1.3,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 28),
                     // Stats cards
-                    Row(
+                    Column(
                       children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isDark
-                                    ? [
-                                        AppColors.primaryDark.withOpacity(0.3),
-                                        AppColors.primaryDark.withOpacity(0.1),
-                                      ]
-                                    : [
-                                        AppColors.primaryLight.withOpacity(0.2),
-                                        AppColors.primary.withOpacity(0.1),
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isDark
-                                    ? AppColors.primaryDark.withOpacity(0.5)
-                                    : AppColors.primary.withOpacity(0.3),
-                                width: 1,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'My nutritionist',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.getTextColor(isDark),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Get personalized advice',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Icon(
-                                    Icons.family_restroom,
-                                    color: Colors.white,
-                                    size: 16,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.purple.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.purple.withOpacity(0.2),
+                                    width: 1,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${_children.length}',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primary,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.purple,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.restaurant_menu,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'My recipes',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.getTextColor(isDark),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Healthy meal ideas',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  'Enfants',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isDark
-                                    ? [
-                                        AppColors.secondaryDark.withOpacity(0.3),
-                                        AppColors.secondaryDark.withOpacity(0.1),
-                                      ]
-                                    : [
-                                        AppColors.secondaryLight.withOpacity(0.2),
-                                        AppColors.secondary.withOpacity(0.1),
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isDark
-                                    ? AppColors.secondaryDark.withOpacity(0.5)
-                                    : AppColors.secondary.withOpacity(0.3),
-                                width: 1,
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.orange.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.article,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'My articles',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.getTextColor(isDark),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Latest parenting tips',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.secondary,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Icon(
-                                    Icons.school,
-                                    color: Colors.white,
-                                    size: 16,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.green.withOpacity(0.2),
+                                    width: 1,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '3',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.secondary,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.school,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'My classes',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.getTextColor(isDark),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Track progress',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  'Classes',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 32),
               // Section enfants
               Expanded(
                 child: Container(
@@ -391,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Column(
                     children: [
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 28),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22),
                         child: Row(
@@ -423,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Expanded(
                         child: _isLoading
                             ? const Center(child: CircularProgressIndicator())
@@ -482,7 +558,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : _children.isEmpty
                                     ? SingleChildScrollView(
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
@@ -504,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   color: AppColors.primary,
                                                 ),
                                               ),
-                                              const SizedBox(height: 16),
+                                              const SizedBox(height: 24),
                                               Text(
                                                 'Commencez votre parcours',
                                                 style: TextStyle(
@@ -513,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   color: AppColors.getTextColor(isDark),
                                                 ),
                                               ),
-                                              const SizedBox(height: 6),
+                                              const SizedBox(height: 12),
                                               Text(
                                                 'Ajoutez votre premier enfant\npour suivre son évolution',
                                                 style: TextStyle(
@@ -523,7 +599,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
-                                              const SizedBox(height: 20),
+                                              const SizedBox(height: 28),
                                               Container(
                                                 decoration: BoxDecoration(
                                                   gradient: AppColors.primaryGradient,
@@ -554,12 +630,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       )
                                     : ListView.builder(
-                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                                         itemCount: _children.length,
                                         itemBuilder: (context, index) {
                                           final child = _children[index];
                                           return Container(
-                                            margin: const EdgeInsets.only(bottom: 8),
+                                            margin: const EdgeInsets.only(bottom: 20),
                                             decoration: BoxDecoration(
                                               color: AppColors.getPureBackground(isDark),
                                               borderRadius: BorderRadius.circular(16),
@@ -571,7 +647,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             ),
                                             child: ListTile(
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                                               leading: Container(
                                                 width: 42,
                                                 height: 42,
