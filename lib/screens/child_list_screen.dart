@@ -381,7 +381,8 @@ class _ChildListScreenState extends State<ChildListScreen>
   Widget _buildProfileHeader() {
     return Container(
       margin: const EdgeInsets.all(12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+      height: 157,
       decoration: BoxDecoration(
         gradient: AppColors.warningGradient,
         borderRadius: BorderRadius.circular(16),
@@ -398,8 +399,8 @@ class _ChildListScreenState extends State<ChildListScreen>
           Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 70,
+                height: 70,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: AppColors.primaryGradient,
@@ -424,7 +425,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                     Text(
                       widget.child.fullName,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -435,7 +436,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                     Text(
                       widget.child.grade,
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         color: Colors.white70,
                         fontWeight: FontWeight.w500,
                       ),
@@ -444,7 +445,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                     Text(
                       widget.child.establishment,
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 14,
                         color: Colors.white60,
                       ),
                     ),
@@ -453,7 +454,7 @@ class _ChildListScreenState extends State<ChildListScreen>
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           Row(
             children: [
               _buildStatusBadge('⭐ Excellent', AppColors.success),
@@ -478,10 +479,10 @@ class _ChildListScreenState extends State<ChildListScreen>
 
   Widget _buildStatusBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(

@@ -24,8 +24,6 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final bgColor = backgroundColor ?? AppColors.primary;
     final txtColor = textColor ?? AppColors.white;
 
@@ -38,12 +36,9 @@ class CustomButton extends StatelessWidget {
           backgroundColor: bgColor,
           foregroundColor: txtColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
-          elevation: isDark ? 4 : 2,
-          shadowColor: isDark 
-              ? AppColors.black.withOpacity(0.3)
-              : AppColors.primary.withOpacity(0.2),
+          elevation: 0,
         ),
         child: isLoading
             ? SizedBox(

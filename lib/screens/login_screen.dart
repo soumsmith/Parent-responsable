@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../app.dart';
 import '../config/app_colors.dart';
+import '../widgets/custom_button.dart';
 import 'signup_screen.dart';
 import 'otp_verification_screen.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 /// Écran de connexion
 class LoginScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   bool _isLoading = false;
+  String _completePhoneNumber = '';
 
   @override
   void initState() {
@@ -46,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final phone = _phoneController.text.trim();
+    final phone = _completePhoneNumber.isNotEmpty ? _completePhoneNumber : _phoneController.text.trim();
     final result = await AuthService.instance.loginWithPhone(phone);
 
     setState(() {
@@ -147,85 +149,78 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  // Formulaire de connexion minimaliste
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.getSurfaceColor(isDark),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark
-                              ? AppColors.black.withOpacity(0.15)
-                              : AppColors.shadowLight,
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Connexion',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.getTextColor(isDark),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
+                          child: IntlPhoneField(
+                            controller: _phoneController,
+                            initialCountryCode: 'CI', // Côte d'Ivoire par défaut
+                            onChanged: (phone) {
+                              _completePhoneNumber = phone.completeNumber;
+                            },
+                            validator: (value) {
+                              if (value == null || value.number.isEmpty) {
+                                return 'Veuillez entrer votre numéro de téléphone';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Numéro de téléphone',
+                              hintText: 'XX XX XX XX',
+                              labelStyle: TextStyle(
+                                color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                              ),
+                              hintStyle: TextStyle(
+                                color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              filled: true,
+                              fillColor: Colors.transparent,
+                            ),
+                            style: TextStyle(
+                              color: AppColors.getTextColor(isDark),
+                              fontSize: 16,
+                            ),
+                            dropdownTextStyle: TextStyle(
+                              color: AppColors.getTextColor(isDark),
+                              fontSize: 16,
+                            ),
+                            flagsButtonPadding: const EdgeInsets.only(left: 8, right: 8),
+                            showCountryFlag: true,
+                            dropdownIcon: Icon(
+                              Icons.arrow_drop_down,
+                              color: AppColors.getTextColor(isDark),
+                            ),
+                            disableLengthCheck: false,
+                          ),
                         ),
                         const SizedBox(height: 20),
-                        // Champ téléphone minimaliste
-                        TextFormField(
-                          controller: _phoneController,
-                          decoration: InputDecoration(
-                            labelText: 'Numéro de téléphone',
-                            hintText: '+225 XX XX XX XX',
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.getBorderColor(isDark),
-                              ),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.getBorderColor(isDark),
-                              ),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.primary,
-                                width: 2,
-                              ),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.phone,
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                            ),
-                            labelStyle: TextStyle(
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                            ),
-                            hintStyle: TextStyle(
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
-                            ),
-                          ),
-                          keyboardType: TextInputType.phone,
-                          style: TextStyle(
-                            color: AppColors.getTextColor(isDark),
-                            fontSize: 16,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre numéro de téléphone';
-                            }
-                            final phoneRegex = RegExp(r'^[+]?[0-9]{8,15}$');
-                            final cleanPhone = value.replaceAll(RegExp(r'[\s-]'), '');
-                            if (!phoneRegex.hasMatch(cleanPhone)) {
-                              return 'Format de téléphone invalide';
-                            }
-                            return null;
-                          },
-                          autofocus: true,
+                        // Bouton connexion minimaliste
+                        CustomButton(
+                          text: 'Connexion',
+                          onPressed: _handleLogin,
+                          isLoading: _isLoading,
                         ),
                         const SizedBox(height: 16),
                         // Lien créer un compte
@@ -247,36 +242,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        // Bouton connexion minimaliste
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: AppColors.white,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
-                                    ),
-                                  )
-                                : const Text('Connexion'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   // Info box minimaliste
                   Container(

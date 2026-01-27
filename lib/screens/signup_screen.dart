@@ -3,6 +3,7 @@ import '../widgets/custom_button.dart';
 import '../services/auth_service.dart';
 import '../config/app_colors.dart';
 import 'otp_verification_screen.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 /// Écran de création de compte avec formulaire téléphone
 class SignupScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   bool _isLoading = false;
+  String _completePhoneNumber = '';
 
   @override
   void dispose() {
@@ -33,7 +35,8 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     // Envoie l'OTP via AuthService
-    final result = await AuthService.instance.sendOtp(_phoneController.text.trim());
+    final phone = _completePhoneNumber.isNotEmpty ? _completePhoneNumber : _phoneController.text.trim();
+    final result = await AuthService.instance.sendOtp(phone);
     
     if (mounted) {
       setState(() {
@@ -64,7 +67,7 @@ class _SignupScreenState extends State<SignupScreen> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => OtpVerificationScreen(
-            phone: _phoneController.text.trim(),
+            phone: phone,
             isLogin: false,
           ),
         ),
@@ -90,24 +93,6 @@ class _SignupScreenState extends State<SignupScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.getTextColor(isDark),
-          ),
-        ),
-        title: Text(
-          'Création de compte',
-          style: TextStyle(
-            color: AppColors.getTextColor(isDark),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -125,36 +110,48 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Bouton retour en haut à gauche
+                  Row(
+                    children: [
+                      const SizedBox(width: 0),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: AppColors.getTextColor(isDark),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
-                  // Logo placeholder
+                  // Logo
                   Center(
                     child: Container(
-                      width: 80,
-                      height: 80,
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.primary.toSurface(),
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Icon(
                         Icons.person_add,
-                        size: 40,
+                        size: 64,
                         color: AppColors.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
                   Text(
                     'CRÉER UN COMPTE',
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.getTextColor(isDark),
                     ),
                     textAlign: TextAlign.center,
@@ -169,84 +166,94 @@ class _SignupScreenState extends State<SignupScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  // Formulaire
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.getSurfaceColor(isDark),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.getBorderColor(isDark),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextFormField(
-                          controller: _phoneController,
-                          decoration: InputDecoration(
-                            labelText: 'Numéro de téléphone *',
-                            hintText: '+225 XX XX XX XX',
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.getBorderColor(isDark),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.getBorderColor(isDark),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.primary,
-                                width: 2,
-                              ),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.phone,
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                            ),
-                            labelStyle: TextStyle(
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
-                            ),
-                            hintStyle: TextStyle(
-                              color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
-                            ),
+                            ],
                           ),
-                          style: TextStyle(
-                            color: AppColors.getTextColor(isDark),
+                          child: IntlPhoneField(
+                            controller: _phoneController,
+                            initialCountryCode: 'CI', // Côte d'Ivoire par défaut
+                            onChanged: (phone) {
+                              _completePhoneNumber = phone.completeNumber;
+                            },
+                            validator: (value) {
+                              if (value == null || value.number.isEmpty) {
+                                return 'Veuillez entrer votre numéro de téléphone';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Numéro de téléphone *',
+                              hintText: 'XX XX XX XX',
+                              labelStyle: TextStyle(
+                                color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                              ),
+                              hintStyle: TextStyle(
+                                color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              filled: true,
+                              fillColor: Colors.transparent,
+                            ),
+                            style: TextStyle(
+                              color: AppColors.getTextColor(isDark),
+                              fontSize: 16,
+                            ),
+                            dropdownTextStyle: TextStyle(
+                              color: AppColors.getTextColor(isDark),
+                              fontSize: 16,
+                            ),
+                            flagsButtonPadding: const EdgeInsets.only(left: 8, right: 8),
+                            showCountryFlag: true,
+                            dropdownIcon: Icon(
+                              Icons.arrow_drop_down,
+                              color: AppColors.getTextColor(isDark),
+                            ),
+                            disableLengthCheck: false,
                           ),
-                          keyboardType: TextInputType.phone,
-                          validator: _validatePhone,
-                          autofocus: true,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         CustomButton(
                           text: 'Envoyer le code OTP',
                           onPressed: _handleSignup,
                           isLoading: _isLoading,
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   // Info box
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.primary.toSurface(),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.primary.withOpacity(0.3),
-                        width: 1,
-                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: AppColors.primary),
-                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Un code de vérification sera envoyé par SMS à votre numéro de téléphone.',
