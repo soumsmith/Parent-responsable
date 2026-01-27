@@ -158,21 +158,22 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Entrez votre numéro de téléphone pour créer votre compte',
+                    'Entrez votre numéro de téléphone\npour créer votre compte',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                      height: 1.4,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? AppColors.surfaceDark : Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -190,14 +191,29 @@ class _SignupScreenState extends State<SignupScreen> {
                               }
                               return null;
                             },
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 16,
+                            ),
+                            dropdownTextStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 16,
+                            ),
+                            flagsButtonPadding: const EdgeInsets.only(left: 8, right: 8),
+                            showCountryFlag: true,
+                            dropdownIcon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            disableLengthCheck: false,
                             decoration: InputDecoration(
                               labelText: 'Numéro de téléphone *',
                               hintText: 'XX XX XX XX',
                               labelStyle: TextStyle(
-                                color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                               ),
                               hintStyle: TextStyle(
-                                color: AppColors.getTextColor(isDark, type: TextType.secondary).withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -215,21 +231,6 @@ class _SignupScreenState extends State<SignupScreen> {
                               filled: true,
                               fillColor: Colors.transparent,
                             ),
-                            style: TextStyle(
-                              color: AppColors.getTextColor(isDark),
-                              fontSize: 16,
-                            ),
-                            dropdownTextStyle: TextStyle(
-                              color: AppColors.getTextColor(isDark),
-                              fontSize: 16,
-                            ),
-                            flagsButtonPadding: const EdgeInsets.only(left: 8, right: 8),
-                            showCountryFlag: true,
-                            dropdownIcon: Icon(
-                              Icons.arrow_drop_down,
-                              color: AppColors.getTextColor(isDark),
-                            ),
-                            disableLengthCheck: false,
                           ),
                         ),
                         const SizedBox(height: 20),

@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     
     <application
-        android:label="pouls_ecole_parent"
+        android:label="Parent responsable"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
