@@ -59,5 +59,29 @@ abstract class ApiService {
   /// Body: { "firstName": "...", "lastName": "...", "establishment": "...", "grade": "..." }
   /// Response: { "id": "...", "child": {...} }
   Future<bool> addChild(String parentId, Child child);
+
+  // ---------- Domaines étendus (présence, conduite, risque, messagerie, événements, fournitures, commandes) ----------
+  // En MOCK_MODE, MockApiService lit depuis SQLite. En production, RemoteApiService appellera les endpoints backend.
+
+  /// Présence : liste des enregistrements (date, statut, motif)
+  Future<List<Map<String, dynamic>>> getAttendanceForChild(String childId);
+
+  /// Sanctions / conduite
+  Future<List<Map<String, dynamic>>> getSanctionsForChild(String childId);
+
+  /// Alertes risque (élève en difficulté)
+  Future<List<Map<String, dynamic>>> getRiskAlertsForChild(String childId);
+
+  /// Threads de messagerie du parent
+  Future<List<Map<String, dynamic>>> getMessageThreads(String parentId);
+
+  /// Événements d'un établissement
+  Future<List<Map<String, dynamic>>> getEventsForEcole(int ecoleId);
+
+  /// Fournitures d'une classe
+  Future<List<Map<String, dynamic>>> getSuppliesForClasse(int classeId);
+
+  /// Commandes du parent
+  Future<List<Map<String, dynamic>>> getOrdersForParent(String parentId);
 }
 

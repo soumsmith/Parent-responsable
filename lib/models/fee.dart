@@ -51,5 +51,45 @@ class Fee {
       'reference': reference,
     };
   }
+
+  /// Création depuis une ligne SQLite (fees)
+  static Fee fromDbMap(Map<String, dynamic> m) {
+    final total = (m['montantTotal'] as num?)?.toDouble() ?? 0;
+    final paye = (m['montantPaye'] as num?)?.toDouble() ?? 0;
+    final isPaid = paye >= total || (m['statut'] as String? ?? '').toUpperCase() == 'PAID';
+    final echeance = m['dateEcheance'];
+    DateTime due;
+    if (echeance == null) {
+      due = DateTime.now();
+    } else if (echeance is int) {
+      due = DateTime.fromMillisecondsSinceEpoch(echeance);
+    } else {
+      due = DateTime.tryParse(echeance.toString()) ?? DateTime.now();
+    }
+    return Fee(
+      id: m['id'] as String? ?? '',
+      childId: m['childId'] as String? ?? '',
+      type: m['libelle'] as String? ?? 'Frais',
+      amount: total,
+      dueDate: due,
+      paidDate: null,
+      isPaid: isPaid,
+      paymentMethod: null,
+      reference: null,
+    );
+  }
+
+  /// Conversion vers format SQLite pour saveFees
+  Map<String, dynamic> toDbMap() {
+    return {
+      'id': id,
+      'childId': childId,
+      'libelle': type,
+      'montantTotal': amount,
+      'montantPaye': isPaid ? amount : 0,
+      'dateEcheance': dueDate.millisecondsSinceEpoch,
+      'statut': isPaid ? 'PAID' : 'PENDING',
+    };
+  }
 }
 

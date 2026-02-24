@@ -792,6 +792,260 @@ class PoulsScolaireApiService {
     }
   }
 
+  /// Récupère les frais d'un élève par matricule
+  /// GET /students/{matricule}/fees
+  Future<List<Map<String, dynamic>>> getFeesByMatricule(String matricule) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/students/$matricule/fees');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getFeesByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// Récupère les paiements d'un élève par matricule
+  /// GET /students/{matricule}/payments
+  Future<List<Map<String, dynamic>>> getPaymentsByMatricule(String matricule) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/students/$matricule/payments');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getPaymentsByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// GET /students/{matricule}/attendance
+  Future<List<Map<String, dynamic>>> getAttendanceByMatricule(String matricule) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/students/$matricule/attendance');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getAttendanceByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// GET /students/{matricule}/sanctions
+  Future<List<Map<String, dynamic>>> getSanctionsByMatricule(String matricule) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/students/$matricule/sanctions');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getSanctionsByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// GET /students/{matricule}/report-card?periodeId=
+  Future<Map<String, dynamic>?> getReportCardByMatricule(String matricule, {int? periodeId}) async {
+    try {
+      final query = periodeId != null ? {'periodeId': periodeId.toString()} : null;
+      final uri = Uri.parse('$_baseUrl/students/$matricule/report-card').replace(queryParameters: query);
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data is Map<String, dynamic> ? data : null;
+      }
+      return null;
+    } catch (e) {
+      print('⚠️ getReportCardByMatricule: $e');
+      return null;
+    }
+  }
+
+  /// GET /students/{matricule}/risk-analysis
+  Future<List<Map<String, dynamic>>> getRiskAnalysisByMatricule(String matricule) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/students/$matricule/risk-analysis');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['items'] is List) return List<Map<String, dynamic>>.from((data['items'] as List).map((e) => e as Map<String, dynamic>));
+        if (data is Map && data['alerts'] is List) return List<Map<String, dynamic>>.from((data['alerts'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getRiskAnalysisByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// GET /students/{matricule}/timetable?week=
+  Future<List<Map<String, dynamic>>> getTimetableByMatricule(String matricule, {int? week}) async {
+    try {
+      final query = week != null ? {'week': week.toString()} : null;
+      final uri = Uri.parse('$_baseUrl/students/$matricule/timetable').replace(queryParameters: query);
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getTimetableByMatricule: $e');
+      return [];
+    }
+  }
+
+  /// GET /messages/threads (liste des conversations du parent)
+  Future<List<Map<String, dynamic>>> getMessageThreads(String parentId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/messages/threads').replace(queryParameters: {'parentId': parentId});
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getMessageThreads: $e');
+      return [];
+    }
+  }
+
+  /// GET /messages/threads/{threadId} (messages d'une conversation)
+  Future<List<Map<String, dynamic>>> getMessagesByThreadId(String threadId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/messages/threads/$threadId');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        if (data is Map && data['messages'] is List) return List<Map<String, dynamic>>.from((data['messages'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getMessagesByThreadId: $e');
+      return [];
+    }
+  }
+
+  /// POST /messages/threads/{threadId} (envoyer un message)
+  Future<Map<String, dynamic>?> postMessage(String threadId, String content, String parentId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/messages/threads/$threadId');
+      final body = json.encode({'content': content, 'senderId': parentId});
+      final response = await http.post(uri, headers: _headers, body: body).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data is Map<String, dynamic> ? data : null;
+      }
+      return null;
+    } catch (e) {
+      print('⚠️ postMessage: $e');
+      return null;
+    }
+  }
+
+  /// GET /schools/{ecoleId}/events
+  Future<List<Map<String, dynamic>>> getEventsByEcoleId(int ecoleId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/schools/$ecoleId/events');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getEventsByEcoleId: $e');
+      return [];
+    }
+  }
+
+  /// POST /events/{eventId}/tickets (réserver un ticket)
+  Future<Map<String, dynamic>?> postEventTicket(String eventId, String parentId, {String? childId}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/events/$eventId/tickets');
+      final body = json.encode({'parentId': parentId, if (childId != null) 'childId': childId});
+      final response = await http.post(uri, headers: _headers, body: body).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data is Map<String, dynamic> ? data : null;
+      }
+      return null;
+    } catch (e) {
+      print('⚠️ postEventTicket: $e');
+      return null;
+    }
+  }
+
+  /// GET /classes/{classeId}/supplies
+  Future<List<Map<String, dynamic>>> getSuppliesByClasseId(int classeId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/classes/$classeId/supplies');
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getSuppliesByClasseId: $e');
+      return [];
+    }
+  }
+
+  /// GET /orders?parentId=
+  Future<List<Map<String, dynamic>>> getOrdersByParentId(String parentId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/orders').replace(queryParameters: {'parentId': parentId});
+      final response = await http.get(uri, headers: _headers).timeout(AppConfig.API_TIMEOUT);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is Map && data['content'] is List) return List<Map<String, dynamic>>.from((data['content'] as List).map((e) => e as Map<String, dynamic>));
+        return [];
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getOrdersByParentId: $e');
+      return [];
+    }
+  }
+
   /// Supprime un token FCM (déconnexion)
   /// 
   /// Endpoint: DELETE /api/notifications/unregister-token?userId={userId}&token={token}

@@ -5,6 +5,14 @@ import '../screens/tutor_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/help_support_screen.dart';
 import '../screens/new_settings_screen.dart';
+import '../screens/fees_tab_screen.dart';
+import '../screens/presence_conduite_tab_screen.dart';
+import '../screens/timetable_tab_screen.dart';
+import '../screens/report_card_tab_screen.dart';
+import '../screens/student_risk_tab_screen.dart';
+import '../screens/chat_list_screen.dart';
+import '../screens/events_tab_screen.dart';
+import '../screens/supplies_orders_tab_screen.dart';
 import '../widgets/main_screen_wrapper.dart';
 import '../config/app_colors.dart';
 
@@ -129,6 +137,102 @@ class BottomSheetMenu extends StatelessWidget {
 
   Widget _buildMenuItems(BuildContext context) {
     final menuItems = [
+      {
+        'title': 'Scolarité & Paiements',
+        'subtitle': 'Frais, paiements et historique',
+        'icon': Icons.payment_outlined,
+        'color': 0xFF0EA5E9,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: FeesTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Présence & Conduite',
+        'subtitle': 'Absences et sanctions',
+        'icon': Icons.event_available,
+        'color': 0xFF10B981,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: PresConduiteTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Emploi du temps',
+        'subtitle': 'Voir les emplois du temps par enfant',
+        'icon': Icons.calendar_today_outlined,
+        'color': 0xFF0D9488,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: TimetableTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Bulletin PDF',
+        'subtitle': 'Télécharger le bulletin avec QR',
+        'icon': Icons.picture_as_pdf_outlined,
+        'color': 0xFFB45309,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: ReportCardTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Élève en difficulté',
+        'subtitle': 'Analyse des risques et recommandations',
+        'icon': Icons.analytics_outlined,
+        'color': 0xFFDC2626,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: StudentRiskTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Messagerie',
+        'subtitle': 'Conversations avec l\'établissement',
+        'icon': Icons.chat_bubble_outline,
+        'color': 0xFF059669,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: ChatListScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Événements',
+        'subtitle': 'Événements scolaires et réservation',
+        'icon': Icons.event_outlined,
+        'color': 0xFF7C3AED,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: EventsTabScreen())),
+          );
+        },
+      },
+      {
+        'title': 'Fournitures & commandes',
+        'subtitle': 'Liste fournitures et mes commandes',
+        'icon': Icons.backpack_outlined,
+        'color': 0xFF0D9488,
+        'onTap': () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MainScreenWrapper(child: SuppliesOrdersTabScreen())),
+          );
+        },
+      },
       {
         'title': 'Boutique (Libouli)',
         'subtitle': 'Accéder à la boutique en ligne',

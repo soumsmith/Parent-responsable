@@ -328,7 +328,7 @@ class _ChildListScreenState extends State<ChildListScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    NotesScreen(childId: widget.child.id),
+                    ChildNotesScreen(childId: widget.child.id),
                     TimetableScreen(childId: widget.child.id),
                     _buildHomeworkTab(),
                     _buildAbsencesTab(),

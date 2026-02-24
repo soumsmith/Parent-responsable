@@ -4,6 +4,16 @@ import '../widgets/bottom_nav.dart';
 import '../widgets/bottom_sheet_menu.dart';
 import '../screens/home_screen.dart';
 import '../screens/messages_screen.dart';
+import '../screens/notes_tab_screen.dart';
+import '../screens/notes_screen.dart';
+import '../screens/fees_tab_screen.dart';
+import '../screens/fees_screen.dart';
+import '../screens/presence_conduite_tab_screen.dart';
+import '../screens/attendance_screen.dart';
+import '../screens/discipline_screen.dart';
+import '../screens/chat_list_screen.dart';
+import '../screens/chat_detail_screen.dart';
+import '../screens/events_tab_screen.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../config/app_config.dart';
@@ -60,6 +70,11 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
   void _handleNotification(Map<String, dynamic> data) {
     final title = data['title'] as String? ?? 'Notification';
     final body = data['body'] as String? ?? '';
+    final payload = data['data'] as Map<String, dynamic>? ?? {};
+    final type = (payload['type'] as String? ?? '').toUpperCase();
+    final childId = payload['childId'] as String? ?? payload['matricule'] as String?;
+    final threadId = payload['threadId'] as String? ?? payload['thread_id'] as String?;
+    final eventId = payload['eventId'] as String? ?? payload['event_id'] as String?;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -72,7 +87,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title, 
+                title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.getTextColor(isDark),
@@ -88,14 +103,69 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
           ),
           duration: const Duration(seconds: 4),
           action: SnackBarAction(
-            label: 'Fermer',
+            label: 'Voir',
             textColor: AppColors.primary,
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
+            onPressed: () => _navigateFromNotification(type, childId: childId, threadId: threadId, eventId: eventId),
           ),
         ),
       );
+    }
+  }
+
+  void _navigateFromNotification(String type, {String? childId, String? threadId, String? eventId}) {
+    if (!mounted) return;
+    final parentId = _currentUserId ?? '';
+    Widget? target;
+    switch (type) {
+      case 'NEW_GRADE':
+      case 'NOTE_ADDED':
+      case 'NOTE_UPDATED':
+        if (childId != null && childId.isNotEmpty) {
+          target = MainScreenWrapper(child: ChildNotesScreen(childId: childId));
+        } else {
+          target = const MainScreenWrapper(child: NotesScreen());
+        }
+        break;
+      case 'PAYMENT_REMINDER':
+      case 'FEE_ADDED':
+        if (childId != null && childId.isNotEmpty) {
+          target = MainScreenWrapper(child: FeesScreen(childId: childId));
+        } else {
+          target = const MainScreenWrapper(child: FeesTabScreen());
+        }
+        break;
+      case 'SANCTION':
+      case 'DISCIPLINE':
+        if (childId != null && childId.isNotEmpty) {
+          target = MainScreenWrapper(child: DisciplineScreen(childId: childId));
+        } else {
+          target = const MainScreenWrapper(child: PresConduiteTabScreen());
+        }
+        break;
+      case 'ABSENCE':
+      case 'ATTENDANCE':
+        if (childId != null && childId.isNotEmpty) {
+          target = MainScreenWrapper(child: AttendanceScreen(childId: childId));
+        } else {
+          target = const MainScreenWrapper(child: PresConduiteTabScreen());
+        }
+        break;
+      case 'MESSAGE':
+      case 'MESSAGE_RECEIVED':
+        if (threadId != null && threadId.isNotEmpty && parentId.isNotEmpty) {
+          target = MainScreenWrapper(child: ChatDetailScreen(threadId: threadId, title: 'Conversation', parentId: parentId));
+        } else {
+          target = const MainScreenWrapper(child: ChatListScreen());
+        }
+        break;
+      case 'EVENT':
+        target = const MainScreenWrapper(child: EventsTabScreen());
+        break;
+      default:
+        break;
+    }
+    if (target != null) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => target!));
     }
   }
 
@@ -128,7 +198,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
     switch (_currentIndex) {
       case 0: return const HomeScreen();
       case 1: return const MessagesScreen();
-      case 2: return const NotesPlaceholderScreen();
+      case 2: return const NotesScreen();
       default: return const HomeScreen();
     }
   }

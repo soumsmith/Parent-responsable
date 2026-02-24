@@ -86,5 +86,48 @@ class RemoteApiService implements ApiService {
     // POST /api/parents/{parentId}/children
     throw UnimplementedError('RemoteApiService not yet implemented');
   }
+
+  // ---------- Domaines étendus (TODO: appels HTTP vers backend) ----------
+  @override
+  Future<List<Map<String, dynamic>>> getAttendanceForChild(String childId) async {
+    // TODO: GET /api/children/{childId}/attendance ou équivalent
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSanctionsForChild(String childId) async {
+    // TODO: GET /api/children/{childId}/sanctions
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRiskAlertsForChild(String childId) async {
+    // TODO: GET /api/children/{childId}/risk-analysis
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMessageThreads(String parentId) async {
+    // TODO: GET /api/parents/{parentId}/messages/threads
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getEventsForEcole(int ecoleId) async {
+    // TODO: GET /api/schools/{ecoleId}/events
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSuppliesForClasse(int classeId) async {
+    // TODO: GET /api/classes/{classeId}/supplies
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getOrdersForParent(String parentId) async {
+    // TODO: GET /api/orders?parentId=
+    return [];
+  }
 }
 

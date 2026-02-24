@@ -485,5 +485,76 @@ class MockApiService implements ApiService {
       return false;
     }
   }
+
+  // ---------- Domaines étendus (lecture depuis SQLite en MOCK_MODE) ----------
+  @override
+  Future<List<Map<String, dynamic>>> getAttendanceForChild(String childId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getAttendanceByChild(childId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSanctionsForChild(String childId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getSanctionsByChild(childId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRiskAlertsForChild(String childId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getRiskAlertsByChild(childId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMessageThreads(String parentId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getThreadsByParent(parentId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getEventsForEcole(int ecoleId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getEventsByEcole(ecoleId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSuppliesForClasse(int classeId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getSuppliesByClasse(classeId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getOrdersForParent(String parentId) async {
+    await _simulateDelay();
+    try {
+      return await DatabaseService.instance.getOrdersByParent(parentId);
+    } catch (_) {
+      return [];
+    }
+  }
 }
 

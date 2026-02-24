@@ -21,6 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Child> _children = [];
   bool _isLoading = true;
   String? _error;
+  String? _dashboardMoyenne;
+  String? _dashboardSolde;
+  String? _dashboardTaux;
+  int _dashboardAlertes = 0;
+  String? _dashboardProchainEvent;
+  bool _dashboardLoading = false;
 
   @override
   void initState() {
@@ -115,11 +121,67 @@ class _HomeScreenState extends State<HomeScreen> {
         _children = children;
         _isLoading = false;
       });
+      if (children.isNotEmpty) _loadDashboard(children.first.id);
     } catch (e) {
       setState(() {
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadDashboard(String childId) async {
+    if (!mounted) return;
+    setState(() => _dashboardLoading = true);
+    try {
+      final db = DatabaseService.instance;
+      String? moyenne;
+      final avg = await db.getLastAverageByChild(childId);
+      if (avg != null && avg['moyenne'] != null) {
+        final m = (avg['moyenne'] as num).toDouble();
+        moyenne = m.toStringAsFixed(1);
+      }
+      double reste = 0;
+      final fees = await db.getFeesByChild(childId);
+      for (final f in fees) {
+        final total = (f['montantTotal'] as num?)?.toDouble() ?? 0;
+        final paye = (f['montantPaye'] as num?)?.toDouble() ?? 0;
+        reste += (total - paye);
+      }
+      final solde = reste > 0 ? '${reste.toStringAsFixed(0)} FCFA' : null;
+      double taux = 0;
+      final att = await db.getAttendanceByChild(childId);
+      if (att.isNotEmpty) {
+        final presents = att.where((e) => (e['statut'] as String? ?? '').toUpperCase().contains('PRESENT')).length;
+        taux = att.length > 0 ? (presents / att.length * 100) : 0;
+      }
+      final tauxStr = att.isNotEmpty ? '${taux.toStringAsFixed(0)}%' : null;
+      final alerts = await db.getRiskAlertsByChild(childId);
+      String? prochainEvent;
+      final info = await db.getChildInfoById(childId);
+      final ecoleId = info?['ecoleId'] as int?;
+      if (ecoleId != null) {
+        final events = await db.getEventsByEcole(ecoleId);
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final next = events.where((e) => (e['dateDebut'] as int? ?? 0) > now).toList()
+          ..sort((a, b) => ((a['dateDebut'] as int?) ?? 0).compareTo((b['dateDebut'] as int?) ?? 0));
+        if (next.isNotEmpty) {
+          final d = next.first['dateDebut'] as int?;
+          final t = next.first['title'] as String? ?? 'Événement';
+          if (d != null) prochainEvent = '${DateTime.fromMillisecondsSinceEpoch(d).day}/${DateTime.fromMillisecondsSinceEpoch(d).month} · $t';
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        _dashboardMoyenne = moyenne;
+        _dashboardSolde = solde;
+        _dashboardTaux = tauxStr;
+        _dashboardAlertes = alerts.length;
+        _dashboardProchainEvent = prochainEvent;
+        _dashboardLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _dashboardLoading = false);
     }
   }
 
@@ -473,6 +535,70 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 28),
+                      if (_children.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22),
+                          child: Text(
+                            'Tableau de bord · ${_children.first.fullName}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.getTextColor(isDark, type: TextType.secondary),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _dashboardLoading
+                            ? const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+                              )
+                            : Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 22),
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.getSurfaceColor(isDark),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.getBorderColor(isDark)),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        _dashboardTile(Icons.grade, 'Moyenne', _dashboardMoyenne ?? '—', isDark),
+                                        const SizedBox(width: 12),
+                                        _dashboardTile(Icons.payment, 'Solde', _dashboardSolde ?? 'À jour', isDark),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        _dashboardTile(Icons.event_available, 'Présence', _dashboardTaux ?? '—', isDark),
+                                        const SizedBox(width: 12),
+                                        _dashboardTile(Icons.warning_amber_rounded, 'Alertes', _dashboardAlertes > 0 ? '$_dashboardAlertes' : 'Aucune', isDark),
+                                      ],
+                                    ),
+                                    if (_dashboardProchainEvent != null && _dashboardProchainEvent!.isNotEmpty) ...[
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.calendar_today, size: 18, color: AppColors.primary),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              _dashboardProchainEvent!,
+                                              style: TextStyle(fontSize: 12, color: AppColors.getTextColor(isDark)),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                        const SizedBox(height: 20),
+                      ],
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22),
                         child: Row(
@@ -825,6 +951,26 @@ class _HomeScreenState extends State<HomeScreen> {
   int _getUniqueSchoolsCount() {
     final uniqueSchools = _children.map((child) => child.establishment).toSet();
     return uniqueSchools.length;
+  }
+
+  Widget _dashboardTile(IconData icon, String label, String value, bool isDark) {
+    return Expanded(
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 10, color: AppColors.getTextColor(isDark, type: TextType.tertiary))),
+                Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.getTextColor(isDark)), overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _getAverageGradeDisplay() {

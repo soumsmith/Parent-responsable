@@ -13,20 +13,20 @@ import '../app.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/searchable_dropdown.dart';
 
-/// Écran d'affichage des notes
-class NotesScreen extends StatefulWidget {
+/// Écran des notes pour un enfant (périodes, matières, détail)
+class ChildNotesScreen extends StatefulWidget {
   final String childId;
 
-  const NotesScreen({
+  const ChildNotesScreen({
     super.key,
     required this.childId,
   });
 
   @override
-  State<NotesScreen> createState() => _NotesScreenState();
+  State<ChildNotesScreen> createState() => _ChildNotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> {
+class _ChildNotesScreenState extends State<ChildNotesScreen> {
   List<SubjectAverage> _allSubjectAverages = [];
   List<SubjectAverage> _filteredSubjectAverages = [];
   GlobalAverage? _globalAverage;
